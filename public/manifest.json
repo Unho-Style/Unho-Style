@@ -1,0 +1,11 @@
+{
+    "lang": "ko",
+    "name": "UnhoStyle",
+    "short_name": "US",
+    "icons": [],
+    "scope": "/",
+    "id": "unho-style",
+    "start_url": "/",
+    "display": "fullscreen",
+    "orientation": "landscape"
+}
