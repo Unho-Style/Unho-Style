@@ -20,9 +20,11 @@
 
 # DB 구조
 > \* 고유 ID는 사용자에게 직접적으로 나타나지 않는 시스템이 사용자나 판매글 등을 식별하기 위한 숫자로 된 ID 입니다.
+MariaDB 10.11을 사용합니다.<br>
+개발용 DB 연결 방법은 추후 안내 예정
 ## User
 사용자 정보
-|id|userId|userPw|position|grade|
+|id|userId|userPw|location|grade|
 |-|-|-|-|-|
 |사용자 고유 ID|사용자에게 표시될 ID|사용자 비밀번호(SHA512 해시화로 저장)|사용자 거주 위치|평점|
 
