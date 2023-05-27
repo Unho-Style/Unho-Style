@@ -1,0 +1,9 @@
+{
+    "ext": ["ejs", "js"],
+    "env": {
+        "env": "development",
+        "DBID": "unhostyle_debug",
+        "DBPW": "unho_style_debug_2023",
+        "DBNM": "unhostyle_debug"
+    }
+}
