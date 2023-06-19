@@ -1,5 +1,5 @@
 {
-    "ext": ["ejs", "js"],
+    "ext": "js ejs",
     "env": {
         "env": "development",
         "DBID": "unhostyle_debug",
