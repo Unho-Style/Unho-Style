@@ -23,7 +23,7 @@
 * nodejs
 * html
 * css
-* MariaDB
+* SQLite
 * ejs
 * PWA
 
