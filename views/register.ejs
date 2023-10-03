@@ -24,6 +24,17 @@
             <div class="invalid-feedback email">올바르지 않은 학교 이메일입니다.</div>
         </div>
         <div class="form-group">
+            <label for="email">거주 지역</label>
+            <select class="form-control" id="location" required>
+                <option value="0">상당구</option>
+                <option value="1">서원구</option>
+                <option value="2">흥덕구</option>
+                <option value="3">청원구</option>
+                <option value="4">서외</option>
+            </select>
+            <!-- <input type="email" class="form-control" id="email" pattern="294s-[0-9]{6}@cberi\.go\.kr" aria-describedby="emailHelp" placeholder="294s-(입학년도)(학번)@cberi.go.kr" required>           -->
+        </div>
+        <div class="form-group">
             <div class="row">
                 <div class="col">
                     <label for="password">비밀번호</label>
@@ -43,21 +54,43 @@
 
 <script>
     function register() {
+        function _fallback(msg) {
+            //TODO: 웹페이지 자체 모달로 변경
+            msg.then((json) => {
+                if(!!json.msg) {
+                    alert(json.msg);
+                }else{
+                    alert('회원가입에 실패했습니다. 잠시후 다시 시도해주세요')
+                }
+            }).catch(() => {
+                alert('회원가입에 실패했습니다. 잠시후 다시 시도해주세요')
+            })
+        }
         // form.classList.remove('was-validated')
         let email = $('#email').val();
         let id = $('#id').val();
         let password = $('#password').val();
+        let location = $('#location').val();
         let passwordConfirm = $('#passwordConfirm').val();
         var form = $('.registerForm')[0];
         form.classList.add('was-validated')
         if(!form.checkValidity()) return;
-        $.post('/api/user/register', {
-            'email': email,
-            'id': id,
-            'password': password
+        fetch('/api/user/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                'email': email,
+                'id': id,
+                'password': password,
+                'location': location
+            }),
         }).then((res) => {
             if(res.status === 200) {
-                location.href = '/authcode';
+                document.location.href = '/emailconfirm';
+            }else{
+                _fallback(res.json())
             }
         })
     }

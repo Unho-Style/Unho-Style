@@ -1,4 +1,19 @@
-<form>
-    <input type="text" name="username">
-    <input type="password" name="password">
-</form>
+<style>
+
+</style>
+
+<div class="root">
+    <h2>로그인</h2>
+    <form class="loginForm" novalidate method="POST" action="javascript:void(0);" onSubmit="login()">
+        <div class="form-group">
+          <label for="id">인증번호</label>
+          <input type="number" maxlength="6" class="form-control" id="code" pattern="[0-9]{6}" placeholder="6자리 인증번호" required>
+          <div class="invalid-feedback code">올바르지 않은 인증번호 입니다.</div>
+        </div>
+        <button type="submit" style="margin-top: 3vh;" class="btn btn-primary">확인</button>
+    </form>
+</div>
+
+<script>
+    
+</script>

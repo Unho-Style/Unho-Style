@@ -9,6 +9,7 @@ var indexRouter = require('./routes/index');
 var loginRouter = require('./routes/login');
 var registerRouter = require('./routes/register');
 var emailconfirmRouter = require('./routes/emailconfirm');
+var userApiRouter = require('./routes/api/user');
 
 var app = express();
 
@@ -21,7 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(session({
-    secret: 'fucking! strong_password123',
+    secret: 'fuck1ng! str0ng_pa55w0rd123',
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -35,6 +36,7 @@ app.use('/', indexRouter);
 app.use('/login', loginRouter);
 app.use('/register', registerRouter);
 app.use('/emailconfirm', emailconfirmRouter);
+app.use('/api/user', userApiRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

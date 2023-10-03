@@ -1,13 +1,24 @@
 <style>
+ * {
+    text-align: center;
+ }
 
+ .root {
+    width: 80%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+ }
 </style>
 
-<div>
+<div class="root">
+    <h2>인증번호를 입력해주세요</h2>
     <form class="authForm" novalidate method="POST" action="javascript:void(0);" onSubmit="sendCode()">
         <div class="form-group">
           <label for="id">인증번호</label>
-          <input type="text" class="form-control" id="code" pattern="[0-9]{6}" placeholder="6자리 인증번호" required>
-          <div class="invalid-feedback code">옳바르지 않은 인증번호 입니다.</div>
+          <input type="number" maxlength="6" class="form-control" id="code" pattern="[0-9]{6}" placeholder="6자리 인증번호" required>
+          <div class="invalid-feedback code">올바르지 않은 인증번호 입니다.</div>
         </div>
         <button type="submit" style="margin-top: 3vh;" class="btn btn-primary">확인</button>
     </form>
@@ -15,13 +26,15 @@
 
 <script>
     function sendCode() {
-        $.post('/api/user/emailconfirm', {
-            'code': $('#code').val()
+        fetch('/api/user/emailconfirm', {
+            method: 'POST',
+            data: JSON.stringify({'code': $('#code').val()})
         }).then((res) => {
-
-
-        }).catch(res => {
-            $('.code').text(res.msg);
+            if(res.status == 200) {
+                document.location.href = '/';
+            }else{
+                $('#code')[0].setCustomValidity('코드미일치');
+            }
         })
     }
 </script>
