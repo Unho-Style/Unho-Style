@@ -8,10 +8,29 @@
     }
 </style>
 
+<div class="modal fade" id="registerFail" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">회원가입 실패</h5>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          ...
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">닫기</button>
+        </div>
+      </div>
+    </div>
+</div>
+
 <div class="formdiv">
     <h1>회원가입</h1>
 
-    <form class="registerForm" novalidate method="POST" action="javascript:void(0);" onSubmit="register()">
+    <form class="registerForm was-validated" novalidate method="POST" action="javascript:void(0);" onSubmit="register()">
         <div class="form-group">
           <label for="id">사용자 ID</label>
           <input type="text" class="form-control" id="id" aria-describedby="userIDHelp" placeholder="사용자 ID" required>
@@ -58,12 +77,14 @@
             //TODO: 웹페이지 자체 모달로 변경
             msg.then((json) => {
                 if(!!json.msg) {
-                    alert(json.msg);
+                    $('.modal-body').text(json.msg);
                 }else{
-                    alert('회원가입에 실패했습니다. 잠시후 다시 시도해주세요')
+                    $('.modal-body').text('회원가입에 실패했습니다. 잠시후 다시 시도해주세요')
                 }
             }).catch(() => {
-                alert('회원가입에 실패했습니다. 잠시후 다시 시도해주세요')
+                $('.modal-body').text('회원가입에 실패했습니다. 잠시후 다시 시도해주세요');
+            }).finally(() => {
+                $('#registerFail').modal('show');
             })
         }
         // form.classList.remove('was-validated')
@@ -73,7 +94,6 @@
         let location = $('#location').val();
         let passwordConfirm = $('#passwordConfirm').val();
         var form = $('.registerForm')[0];
-        form.classList.add('was-validated')
         if(!form.checkValidity()) return;
         fetch('/api/user/register', {
             method: 'POST',

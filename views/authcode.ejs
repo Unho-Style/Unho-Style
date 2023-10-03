@@ -3,6 +3,14 @@
     text-align: center;
  }
 
+ p {
+    margin: 0
+ }
+
+ form {
+    margin-top: 1vh;
+ }
+
  .root {
     width: 80%;
     position: absolute;
@@ -14,6 +22,8 @@
 
 <div class="root">
     <h2>인증번호를 입력해주세요</h2>
+    <p>운호스 사용을 위해 이메일로 전송된 인증코드를 입력해주세요.</p>
+    <a href="#">코드 재전송</a>
     <form class="authForm" novalidate method="POST" action="javascript:void(0);" onSubmit="sendCode()">
         <div class="form-group">
           <label for="id">인증번호</label>
