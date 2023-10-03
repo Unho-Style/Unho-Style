@@ -1,16 +1,35 @@
 <div class="main">
-    <span style="font-weight: bold; font-size:xx-large;">운호스,<br/>쉽고 빠른 득템 기회</span>
-    <br/>
-    <div style="display: inline-block; margin-top: 1vh;">
-        <button class="btn btn-primary">로그인</button> <button class="btn btn-primary">회원가입</button>
+    <img class="logo" src="https://i.namu.wiki/i/ro20g2IHE1i3GFocYV6DooK0q2Zp1yvBhF3EOj1lKYDlVOU7nlj3sChgKDKtlnEBKMtkAczKBaHW2S2bULT5O9xkLE0AY4eK3dXSaPKVmjyJsl34IqGNXqqwy2G8vOGH3EpKYscit1ym9psiyY3faA.webp">
+    <div>
+        <span class="text">운호스,<br>쉽고 빠른 득템 기회</span>
+        <br/>
+        <div style="margin-top: 1vh;">
+            <a class="btn btn-primary" href="/login">로그인</a> <a class="btn btn-primary" href="/register">회원가입</a>
+        </div>
     </div>
 </div>
 
 <style>
+    .logo {
+        width: 100px;
+        object-fit: scale-down;
+        margin-right: 1vw;
+    }
+
+    .text {
+        font-weight: bold; 
+        font-size:xx-large; 
+        overflow:hidden; 
+        text-wrap: nowrap;
+        margin: 0;
+    }
+
     .main {
-        position:absolute;
+        position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+        display: flex;
+        justify-content: center;
     }
 </style>

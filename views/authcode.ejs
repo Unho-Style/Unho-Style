@@ -1,0 +1,27 @@
+<style>
+
+</style>
+
+<div>
+    <form class="authForm" novalidate method="POST" action="javascript:void(0);" onSubmit="sendCode()">
+        <div class="form-group">
+          <label for="id">인증번호</label>
+          <input type="text" class="form-control" id="code" pattern="[0-9]{6}" placeholder="6자리 인증번호" required>
+          <div class="invalid-feedback code">옳바르지 않은 인증번호 입니다.</div>
+        </div>
+        <button type="submit" style="margin-top: 3vh;" class="btn btn-primary">확인</button>
+    </form>
+</div>
+
+<script>
+    function sendCode() {
+        $.post('/api/user/emailconfirm', {
+            'code': $('#code').val()
+        }).then((res) => {
+
+
+        }).catch(res => {
+            $('.code').text(res.msg);
+        })
+    }
+</script>

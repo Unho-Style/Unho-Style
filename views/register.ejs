@@ -1,0 +1,109 @@
+<style>
+    .formdiv {
+        width: 80vw;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+</style>
+
+<div class="formdiv">
+    <h1>회원가입</h1>
+
+    <form class="registerForm" novalidate method="POST" action="javascript:void(0);" onSubmit="register()">
+        <div class="form-group">
+          <label for="id">사용자 ID</label>
+          <input type="text" class="form-control" id="id" aria-describedby="userIDHelp" placeholder="사용자 ID" required>
+          <div class="invalid-feedback id">이미 존재하는 사용자 ID 입니다.</div>
+        </div>
+        <div class="form-group">
+            <label for="email">이메일 주소</label>
+            <input type="email" class="form-control" id="email" pattern="294s-[0-9]{6}@cberi\.go\.kr" aria-describedby="emailHelp" placeholder="294s-(입학년도)(학번)@cberi.go.kr" required>          
+            <small id="emailHelp" class="form-text text-muted">본교학생 인증에 사용할 이메일로 294s-(입학년도)(학번)@cberi.go.kr 형식입니다. ex) 294s-231133@cberi.go.kr</small>
+            <div class="invalid-feedback email">올바르지 않은 학교 이메일입니다.</div>
+        </div>
+        <div class="form-group">
+            <div class="row">
+                <div class="col">
+                    <label for="password">비밀번호</label>
+                    <input type="password" class="form-control" id="password" placeholder="비밀번호" required>
+                    <div class="invalid-feedback password">비밀번호는 영어 대소문자, 숫자, 특수문자를 포함해여 6자 이상이여야 합니다.</div>
+                </div>
+                <div class="col">
+                    <label for="passwordConfirm">비밀번호 확인</label>
+                    <input type="password" class="form-control" id="passwordConfirm" placeholder="비밀번호 확인" required>
+                    <div class="invalid-feedback">비밀번호가 일치하지 않습니다.</div>
+                </div>
+            </div>
+        </div>
+        <button type="submit" style="margin-top: 3vh;" class="btn btn-primary">회원가입</button>
+    </form>
+</div>
+
+<script>
+    function register() {
+        // form.classList.remove('was-validated')
+        let email = $('#email').val();
+        let id = $('#id').val();
+        let password = $('#password').val();
+        let passwordConfirm = $('#passwordConfirm').val();
+        var form = $('.registerForm')[0];
+        form.classList.add('was-validated')
+        if(!form.checkValidity()) return;
+        $.post('/api/user/register', {
+            'email': email,
+            'id': id,
+            'password': password
+        }).then((res) => {
+            if(res.status === 200) {
+                location.href = '/authcode';
+            }
+        })
+    }
+
+    const passwordValidateCheck = (event) => {
+        const engRegex = /[a-zA-Z]+/g
+        const numberRegex = /[0-9]+/g
+        const specRegex = /[-._!"`'#%&,:;<>=@{}~\$\(\)\*\+\/\\\?\[\]\^\|]+/g
+        const inputPW = $('#password').val();
+        const tooltip = $('.invalid-feedback.password');
+        let isError = false;
+        let errorList = [];
+        if(inputPW.length < 6) {
+            isError = true;
+            errorList.push('6자 이상')
+        }
+        if(!engRegex.test(inputPW)) {
+            isError = true;
+            errorList.push('영어 대소문자 포함')
+        }
+        if(!numberRegex.test(inputPW)) {
+            isError = true;
+            errorList.push('숫자 포함')
+        }
+        if(!specRegex.test(inputPW)) {
+            isError = true;
+            errorList.push('특수문자 포함')
+        }
+
+        if(isError) {
+            let html = `비밀번호는 다음을 포함해야 합니다:<br><ul>${errorList.map((e) => `<li>${e}</li>`).join('')}</ul>`
+            tooltip.html(html)
+            $('#password')[0].setCustomValidity('비번 에러');
+        }else{
+            $('#password')[0].setCustomValidity('');
+        }
+    }
+
+    const passwordSameCheck = (event) => {
+        if($('#passwordConfirm').val() !== $('#password').val()) {
+            $('#passwordConfirm')[0].setCustomValidity('비밀번호가 일치하지 않습니다.')
+        }else{
+            $('#passwordConfirm')[0].setCustomValidity('')
+        }
+    }
+    passwordValidateCheck();
+    $('#passwordConfirm').on('input', passwordSameCheck);
+    $('#password').on('input', () => { passwordSameCheck(); passwordValidateCheck(); })
+</script>
