@@ -1,0 +1,168 @@
+<style>
+    .formdiv {
+        width: 80vw;
+        margin: 0 auto;
+        margin-top: 2vh;
+    }
+</style>
+
+<%- include('nav', {username: username}) %>
+
+<div>
+    <div class="modal fade" id="registerFail" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">회원가입 실패</h5>
+              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              ...
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">닫기</button>
+            </div>
+          </div>
+        </div>
+    </div>
+    
+    <div class="formdiv">
+        <h1>회원정보 수정</h1>
+    
+        <form class="registerForm was-validated" novalidate method="POST" action="javascript:void(0);" onSubmit="update()">
+            <div class="form-group">
+              <label for="id">사용자 ID</label>
+              <input type="text" class="form-control" id="id" value="<%=userInfo.username%>" aria-describedby="userIDHelp" placeholder="사용자 ID" readonly required>
+            </div>
+            <div class="form-group">
+                <label for="email">이메일 주소</label>
+                <input type="email" class="form-control" id="email" value="<%=userInfo.email%>" pattern="294s-[0-9]{6}@cberi\.go\.kr" aria-describedby="emailHelp" placeholder="294s-(입학년도)(학번)@cberi.go.kr" readonly required>          
+                <small id="emailHelp" class="form-text text-muted">본교학생 인증에 사용할 이메일로 294s-(입학년도)(학번)@cberi.go.kr 형식입니다. ex) 294s-231133@cberi.go.kr</small>
+                <div class="invalid-feedback email">올바르지 않은 학교 이메일입니다.</div>
+            </div>
+            <div class="form-group">
+                <label for="email">거주 지역</label>
+                <select class="form-control" value="<%=userInfo.location%>"id="location" required>
+                    <option value="0">상당구</option>
+                    <option value="1">서원구</option>
+                    <option value="2">흥덕구</option>
+                    <option value="3">청원구</option>
+                    <option value="4">서외</option>
+                </select>
+                <!-- <input type="email" class="form-control" id="email" pattern="294s-[0-9]{6}@cberi\.go\.kr" aria-describedby="emailHelp" placeholder="294s-(입학년도)(학번)@cberi.go.kr" required>           -->
+            </div>
+            <div class="form-group">
+                <label for="password">기존 비밀번호</label>
+                <input type="password" class="form-control" id="prev-password" placeholder="기존 비밀번호" required>
+                <div class="invalid-feedback prev-password">기존 비밀번호가 일치하지 않습니다.</div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col">
+                        <label for="password">비밀번호</label>
+                        <input type="password" class="form-control" id="password" placeholder="비밀번호" required>
+                        <div class="invalid-feedback password">비밀번호는 영어 대소문자, 숫자, 특수문자를 포함해여 6자 이상이여야 합니다.</div>
+                    </div>
+                    <div class="col">
+                        <label for="passwordConfirm">비밀번호 확인</label>
+                        <input type="password" class="form-control" id="passwordConfirm" placeholder="비밀번호 확인" required>
+                        <div class="invalid-feedback">비밀번호가 일치하지 않습니다.</div>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" style="margin-top: 3vh;" class="btn btn-primary">정보 수정</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function update() {
+        function _fallback(msg) {
+            $('.modal-title').text('회원정보 업데이트 실패')
+            msg.then((json) => {
+                if(!!json.msg) {
+                    $('.modal-body').text(json.msg);
+                }else{
+                    $('.modal-body').text('회원정보 업데이트에 실패했습니다. 잠시후 다시 시도해주세요')
+                }
+            }).catch(() => {
+                $('.modal-body').text('회원정보 업데이트에 실패했습니다. 잠시후 다시 시도해주세요');
+            }).finally(() => {
+                $('#registerFail').modal('show');
+            })
+        }
+
+        let prevPW = $('#prev-password').val();
+        let password = $('#password').val();
+        let location = $('#location').val();
+        let passwordConfirm = $('#passwordConfirm').val();
+        var form = $('.registerForm')[0];
+        if(!form.checkValidity()) return;
+        fetch('/api/user/update', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                'prev_pw': prevPW,
+                'password': password,
+                'location': location
+            }),
+        }).then((res) => {
+            if(res.status === 200) {
+                $('.modal-title').text('회원정보 업데이트 성공')
+                $('.modal-body').text('회원정보 업데이트가 완료되었습니다.')
+                $('#registerFail').modal('show');
+            }else{
+                _fallback(res.json())
+            }
+        })
+    }
+
+    const passwordValidateCheck = (event) => {
+        const engRegex = /[a-zA-Z]+/g
+        const numberRegex = /[0-9]+/g
+        const specRegex = /[-._!"`'#%&,:;<>=@{}~\$\(\)\*\+\/\\\?\[\]\^\|]+/g
+        const inputPW = $('#password').val();
+        const tooltip = $('.invalid-feedback.password');
+        let isError = false;
+        let errorList = [];
+        if(inputPW.length < 6) {
+            isError = true;
+            errorList.push('6자 이상')
+        }
+        if(!engRegex.test(inputPW)) {
+            isError = true;
+            errorList.push('영어 대소문자 포함')
+        }
+        if(!numberRegex.test(inputPW)) {
+            isError = true;
+            errorList.push('숫자 포함')
+        }
+        if(!specRegex.test(inputPW)) {
+            isError = true;
+            errorList.push('특수문자 포함')
+        }
+
+        if(isError) {
+            let html = `비밀번호는 다음을 포함해야 합니다:<br><ul>${errorList.map((e) => `<li>${e}</li>`).join('')}</ul>`
+            tooltip.html(html)
+            $('#password')[0].setCustomValidity('비번 에러');
+        }else{
+            $('#password')[0].setCustomValidity('');
+        }
+    }
+
+    const passwordSameCheck = (event) => {
+        if($('#passwordConfirm').val() !== $('#password').val()) {
+            $('#passwordConfirm')[0].setCustomValidity('비밀번호가 일치하지 않습니다.')
+        }else{
+            $('#passwordConfirm')[0].setCustomValidity('')
+        }
+    }
+    passwordValidateCheck();
+    $('#passwordConfirm').on('input', passwordSameCheck);
+    $('#password').on('input', () => { passwordSameCheck(); passwordValidateCheck(); })
+</script>

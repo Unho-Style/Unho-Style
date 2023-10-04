@@ -15,7 +15,7 @@ router.post('/register', (req, res) => {
             msg: 'Request body is empty'
         });
         return;
-    }
+    } 
     const result = userManager.registerUser(body.id, body.password, body.email, body.location);
     if(result.success) {
         req.session.userId = result.userId;
@@ -28,6 +28,42 @@ router.post('/register', (req, res) => {
         msg: result?.msg
     })
 });
+
+router.patch('/update', (req, res) => {
+    const body = req.body;
+    if(!!!body) {
+        res.status(400)
+        res.json({
+            status: res.statusCode,
+            msg: 'Request body is empty'
+        });
+        return;
+    }
+    let msg;
+    if(!!!req.session.userId) {
+        res.status(500);
+        msg = '로그인하지 않았습니다.'
+    } else {
+        let userInfo = userManager.getUserInfoById(req.session.userId);
+        let hashPW = crypto.createHash('sha512').update(body['prev_pw']).digest('hex');
+        if(userInfo.result.password == hashPW) {
+            let result = userManager.updateUser(req.session.userId, body.password, body.location)
+            if(result) res.status(200);
+            else {
+                res.status(500);
+                msg = result.msg
+            }
+        }else{
+            res.status(403);
+            msg = '이전 비밀번호가 일치하지 않습니다.'
+        }
+    }
+
+    res.json({
+        status: res.statusCode,
+        msg
+    });
+})
 
 router.post('/login', (req, res) => {
     try {
@@ -61,9 +97,9 @@ router.post('/login', (req, res) => {
     });
 });
 
-router.post('/logout', (req, res) => {
+router.get('/logout', (req, res) => {
     req.session.userId = undefined;
-    res.send('');
+    res.redirect('/');
 });
 
 router.post('/emailconfirm', (req, res) => {

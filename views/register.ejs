@@ -74,7 +74,6 @@
 <script>
     function register() {
         function _fallback(msg) {
-            //TODO: 웹페이지 자체 모달로 변경
             msg.then((json) => {
                 if(!!json.msg) {
                     $('.modal-body').text(json.msg);
@@ -87,7 +86,7 @@
                 $('#registerFail').modal('show');
             })
         }
-        // form.classList.remove('was-validated')
+
         let email = $('#email').val();
         let id = $('#id').val();
         let password = $('#password').val();
