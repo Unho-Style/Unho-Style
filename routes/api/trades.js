@@ -6,6 +6,7 @@ const tradeManager = require('../../lib/tradeManager');
 
 router.post('/upload', (req, res) => {
     const body = req.body;
+    let msg;
     if(!!!body) {
         res.status(400)
         res.json({
@@ -14,17 +15,33 @@ router.post('/upload', (req, res) => {
         });
         return;
     }
-    const result = userManager.registerUser(body.id, body.password, body.email, body.location);
-    if(result.success) {
-        req.session.userId = result.userId;
-        verifManager.sendAuthCode(result.userId, body.email);
-        res.status(200);
-    }else res.status(500);
+
+    if(!!!req.session.userId) {
+        res.status(500);
+        msg = '로그인하지 않았습니다.'
+    } else {
+        const result = tradeManager.uploadTrade(req.session.userId, body.title, body.content)
+        if(result.success) res.status(200);
+        else res.status(500);
+    }
 
     res.json({
         status: res.statusCode,
-        msg: result?.msg
-    })
+        msg: msg
+    });
+});
+
+router.get('/get', (req, res) => {
+    let page = req.query.page;
+    const result = tradeManager.getTradesByPage(page);
+
+    if(result.success) res.status(200);
+    else res.status(500);
+
+    res.json({
+        status: res.statusCode,
+        result: result?.result
+    });
 });
 
 router.delete('/remove', (req, res) => {
@@ -38,17 +55,20 @@ router.delete('/remove', (req, res) => {
             });
             return;
         }
+        if(!!!req.session.userId) {
+            res.status(500);
+            msg = '로그인하지 않았습니다.'
+        } else {
+            console.log(body)
 
-        console.log(body)
-
-        let hashPW = crypto.createHash('sha512').update(body.password).digest('hex');
-        const result = userManager.getUserInfoByPassword(body.id, hashPW)
-        console.log(result)
-        if(result.success) {
-            req.session.userId = result.result.id;
-            res.status(200)
-        }else{
-            res.status(401)
+            const result = tradeManager.deleteTrade(body.id, req.session.userId);
+            console.log(result)
+            if(result.success) {
+                req.session.userId = result.result.id;
+                res.status(200)
+            }else{
+                res.status(401)
+            }
         }
     }catch(e){
         console.log(e)
