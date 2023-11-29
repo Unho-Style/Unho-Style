@@ -21,9 +21,12 @@
 </style>
 
 <div class="root">
+    <div class="alert alert-primary resended" style="display: none;" role="alert">
+        인증코드가 재전송되었습니다.
+    </div>
     <h2>인증번호를 입력해주세요</h2>
     <p>운호스 사용을 위해 이메일로 전송된 인증코드를 입력해주세요.</p>
-    <a href="#">코드 재전송</a>
+    <a href="#" id="resendCode">코드 재전송</a>
     <form class="authForm" novalidate method="POST" action="javascript:void(0);" onSubmit="sendCode()">
         <div class="form-group">
           <label for="id">인증번호</label>
@@ -35,6 +38,14 @@
 </div>
 
 <script>
+    $(document).on('click', 'a#resendCode', () => {
+        fetch('/api/user/resendcode', {
+            method: 'POST'
+        }).then((res) => {
+            $('.resend').css('display', 'block');
+        });
+    })
+
     function sendCode() {
         fetch('/api/user/emailconfirm', {
             method: 'POST',

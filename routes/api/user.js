@@ -63,7 +63,23 @@ router.patch('/update', (req, res) => {
         status: res.statusCode,
         msg
     });
-})
+});
+
+router.post('/resendcode', (req, res) => {
+    try {
+        let userInfo = userManager.getUserInfoById(req.session.userId).result;
+        console.log(userInfo)
+        if(!!!userInfo) throw new Error();
+        verifManager.sendAuthCode(req.session.userId, userInfo.email);
+        res.status(200).json({
+            status: res.statusCode
+        })
+    }catch(e) {
+        res.status(500).json({
+            status: res.statusCode
+        })
+    }
+});
 
 router.post('/login', (req, res) => {
     try {
