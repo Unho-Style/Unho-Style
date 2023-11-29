@@ -8,9 +8,10 @@ var session = require('express-session');
 var indexRouter = require('./routes/index');
 var loginRouter = require('./routes/login');
 var registerRouter = require('./routes/register');
+var writeRouter = require('./routes/write');
 var emailconfirmRouter = require('./routes/emailconfirm');
 var userApiRouter = require('./routes/api/user');
-var myInfoRouter = require('./routes/myinfo')
+var myInfoRouter = require('./routes/myinfo');
 
 var app = express();
 
@@ -38,6 +39,7 @@ app.use('/login', loginRouter);
 app.use('/register', registerRouter);
 app.use('/emailconfirm', emailconfirmRouter);
 app.use('/api/user', userApiRouter)
+app.use('/write', writeRouter)
 app.use('/myinfo', myInfoRouter)
 
 // catch 404 and forward to error handler
