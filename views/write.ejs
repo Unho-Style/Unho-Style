@@ -7,19 +7,22 @@
         font-size: 1.3em;
     }
 </style>
+<!-- <script>let editor;</script> -->
 
-<script src="https://cdn.ckeditor.com/ckeditor5/40.1.0/classic/ckeditor.js"></script>
+<script src="/js/ckeditor5/ckeditor.js"></script>
 <%- include('nav', {username: username}) %>
 <div class="root">
-    <form>
+    <form action="javascript:upload();">
         <div class="mb-3">
             <label for="title" class="form-label">제목</label>
             <input type="text" class="form-control" id="title">
-            <!-- <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div> -->
         </div>
         <div class="mb-3">
             <label for="title" class="form-label">가격</label>
-            <input type="number" class="form-control" id="price">
+            <div class="input-group mb-3">
+                <input type="number" class="form-control" id="price">
+                <span class="input-group-text" id="basic-addon2">원</span>
+            </div>
         </div>
         <div class="mb-3">
             <div id="editor"></div>
@@ -30,18 +33,30 @@
 
 <script>
 ClassicEditor
-        .create( document.querySelector( '#editor' ), {
-            simpleUpload: {
-                uploadUrl: '/api/fileupload',
-                withCredentials: true
-            }
-        } )
-        .catch( error => {
-            console.error( error );
-        } );
+    .create( document.querySelector( '#editor' ), {
+        simpleUpload: {
+            uploadUrl: '/api/fileupload',
+            withCredentials: true
+        }
+    }).then(newEditor => {
+        window.editor = newEditor;
+    })
+    .catch( error => {
+        console.error( error );
+    } );
 
-$(document).on('click', 'button.upload', () => {
-    let title = $('input#title').val(0)
-    let body = $('input#title').val(0)
-})
+function upload() {
+    let title = $('input#title').val()
+    let price = $('input#price').val()
+    let body = window.editor.getData();
+    console.log(title, price, body)
+    if(!!!title) {
+        return;
+    }
+    if(!!!body) {
+        return;
+    }
+
+    //TODO: upload product
+}
 </script>
