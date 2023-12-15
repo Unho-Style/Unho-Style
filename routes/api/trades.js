@@ -7,6 +7,7 @@ const tradeManager = require('../../lib/tradeManager');
 router.post('/upload', (req, res) => {
     const body = req.body;
     let msg;
+    let redirID;
     if(!!!body) {
         res.status(400)
         res.json({
@@ -20,14 +21,17 @@ router.post('/upload', (req, res) => {
         res.status(500);
         msg = '로그인하지 않았습니다.'
     } else {
-        const result = tradeManager.uploadTrade(req.session.userId, body.title, body.content)
-        if(result.success) res.status(200);
-        else res.status(500);
+        const result = tradeManager.uploadTrade(req.session.userId, body.title, body.content, body.price, body.images)
+        if(result.success) {
+            res.status(200);
+            redirID = result.id;
+        }else res.status(500);
     }
 
     res.json({
         status: res.statusCode,
-        msg: msg
+        msg: msg,
+        id: redirID
     });
 });
 

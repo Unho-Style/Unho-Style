@@ -1,5 +1,5 @@
 const userManager = require('../../lib/userManager');
-var watermark = require('image-watermark');
+const sharp = require('sharp');
 var express = require('express');
 var router = express.Router();
 var multer = require('multer');
@@ -51,11 +51,19 @@ router.post('/', function(req, res, next) {
                 let wmText = `UNHOS - ${userInfo.username}님의 판매글`
                 let savePath = path.join(appRoot, 'public', 'files', req.file.filename);
                 console.log(savePath);
-                watermark.embedWatermark(savePath,
-                {
-                    'text': wmText,
-                    'override-image': true
-                })
+                sharp(savePath, {
+                    text: {
+                        text: `<span style="color: rgba(255, 255, 255, 0.5);">${wmText}</span>`,
+                        font: 'sans',
+                        rgba: true,
+                        dpi: 300
+                    }
+                }).toFile(savePath);
+                // watermark.embedWatermark(savePath,
+                // {
+                //     'text': wmText,
+                //     'override-image': true
+                // })
                 res.send({
                     'status': res.statusCode,
                     'url': '/files/' + req.file.filename,
