@@ -1,3 +1,5 @@
+const userManager = require('../../lib/userManager');
+var watermark = require('image-watermark');
 var express = require('express');
 var router = express.Router();
 var multer = require('multer');
@@ -10,7 +12,7 @@ var storage = multer.diskStorage({
 		cb(null, path.join(appRoot, 'public', 'files'));
 	},
 	filename: function (req, file, cb) {
-		cb(null,  new Date().getTime() + '_' + file.originalname.normalize('NFC').replace(/ /g, '_'));
+		cb(null, new Date().getTime() + '_' + file.originalname.normalize('NFC').replace(/ /g, '_'));
 	}
 });
 
@@ -27,7 +29,6 @@ var upload = multer({
 router.post('/', function(req, res, next) {
 	if(!!req.session.userId) {
 		upload.single('upload')(req, res, (err) => {
-            console.log(req)
 			if(!req.file) {
 				res.status(400);
 				res.send({
@@ -36,7 +37,7 @@ router.post('/', function(req, res, next) {
                         'message': '파일이 누락되었습니다.',
                     }
 				});
-			}else if(err) {
+			}else if(!!err) {
                 res.status(500);
                 res.send({
                     status: res.statusCode,
@@ -46,6 +47,15 @@ router.post('/', function(req, res, next) {
                 });
             }else{
                 //console.log(req.upload.filename);
+                let userInfo = userManager.getUserInfoById(req.session.userId).result;
+                let wmText = `UNHOS - ${userInfo.username}님의 판매글`
+                let savePath = path.join(appRoot, 'public', 'files', req.file.filename);
+                console.log(savePath);
+                watermark.embedWatermark(savePath,
+                {
+                    'text': wmText,
+                    'override-image': true
+                })
                 res.send({
                     'status': res.statusCode,
                     'url': '/files/' + req.file.filename,
