@@ -180,35 +180,51 @@ let id = 0;
 //     } );
 
 $(document).on('click', '#addImg', () => {
-    console.log('img upload click');
+    if(uploadFile.length > 10) {
+        alert('사진 첨부 가능 개수는 최대 10개 입니다.');
+        return;
+    }
     $('input#file').click();
 });
 $(document).on('change', 'input#file', fileUploaded);
 $(document).on('click', 'a.closeBtn', removeFile);
 
-function fileUploaded(img) {
+async function fileUploaded(img) {
     const files = img.currentTarget?.files;
     // console.log(img);
     // console.log(files);
     if(!!files) {
+        let totalCnt = uploadFile.length + files.length;
+        if(totalCnt > 10) {
+            alert('사진 첨부 가능 개수는 최대 10개 입니다.');
+            return;
+        }
+        $('p.fileCnt').text(`${totalCnt}/10`);
         for(let i = 0; i < files.length; i++) {
             let e = files[i];
-            const reader = new FileReader();
-            reader.onload = (j) => {
-                let card = `<div class="col-md-3 imgCard" data-img-id="${id}">
-                    <div class="thumbnail" style="display: ${uploadFile.length == 0 ? "inline-block" : "none"}"><span>대표이미지</span></div>
-                    <div class="closeBtnBG">
-                        <a href="#" class="closeBtn" data-img-id="${id}">&#x2715;</a>
-                    </div>
-                    <img class="cardImg" src="${j.target.result}">
-                </div>`
-                uploadFile.push({id: id, isThumbnail: uploadFile.length == 0, file: e});
-                id++;
-                $('#imgUpload').append(card);
-            };
-            reader.readAsDataURL(e);
+            let dataURL = await readAsDataURL(e)
+            let card = `<div class="col-md-3 imgCard" data-img-id="${id}">
+                <div class="thumbnail" style="display: ${uploadFile.length == 0 ? "inline-block" : "none"}"><span>대표이미지</span></div>
+                <div class="closeBtnBG">
+                    <a href="#" class="closeBtn" data-img-id="${id}">&#x2715;</a>
+                </div>
+                <img class="cardImg" src="${dataURL}">
+            </div>`
+            uploadFile.push({id: id, isThumbnail: uploadFile.length == 0, file: e});
+            id++;
+            $('#imgUpload').append(card);
         }
     }
+}
+
+function readAsDataURL(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = reject;
+
+        reader.readAsDataURL(blob)
+    });
 }
 
 function removeFile(e) {
@@ -216,6 +232,7 @@ function removeFile(e) {
     let idx = uploadFile.findIndex(e => e.id == targetId);
     uploadFile.splice(idx, 1);
     $('div.imgCard[data-img-id="' + targetId + '"]').remove();
+    $('p.fileCnt').text(`${uploadFile.length}/10`);
     if(!!!uploadFile[0]?.isThumbnail) {
         if(uploadFile[0]?.isThumbnail === undefined) return;
         uploadFile[0].isThumbnail = true;
