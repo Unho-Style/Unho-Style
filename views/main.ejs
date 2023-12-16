@@ -1,11 +1,21 @@
 <style>
+    .root {
+        padding: 25px;
+        height: calc(100vh - 3.5rem);
+        overflow-y: auto;
+    }
 
+    .card {
+        text-decoration: none;
+        margin-bottom: 10px;
+        width: 100%;
+        cursor: pointer;
+    }
 </style>
 
 <%- include('nav', {username: username}) %>
-<div>
+<div class="root">
     <div class="products">
-
     </div>
     <div class="position-absolute bottom-0 end-0 rounded-circle m-5">
         <a href="/write" class="btn btn-success btn-lg" aria-expanded="false" aria-haspopup="true">
@@ -15,5 +25,51 @@
 </div>
 
 <script>
+    let page = 1
+    let isLast = false;
 
+    $('div.root').on('scroll', scrollEvent);
+
+    function scrollEvent(e) {
+        let element = e.target;
+        if(Math.abs(element.scrollHeight - element.scrollTop - element.clientHeight) < 1) {
+            if(isLast) return;
+            fetch('/api/trades/get?page=' + page).then(async res => {
+                let data = await res.json();
+                if(!!data.result) {
+                    data.result.forEach(e => {
+                        let card = `<a class="card" href="/product/${e.id}">
+                            <img src="${e.thumbnail}" class="card-img-top">
+                            <div class="card-body">
+                              <h5 class="card-title">${e.title}</h5>
+                              <p class="card-text">${e.price.toLocaleString('en-US')}원</p>
+                            </div>
+                        </a>`
+                        $('div.products').append(card);
+                    });
+                    if(data.result.length == 0) isLast = true;
+                    page++;
+                }
+            })
+        }
+    }
+
+    $(window).on('load', () => {
+        fetch('/api/trades/get?page=' + page).then(async res => {
+            let data = await res.json();
+            if(!!data.result) {
+                data.result.forEach(e => {
+                    let card = `<a class="card" href="/product/${e.id}">
+                        <img src="${e.thumbnail}" class="card-img-top">
+                        <div class="card-body">
+                          <h5 class="card-title">${e.title}</h5>
+                          <p class="card-text">${e.price.toLocaleString('en-US')}원</p>
+                        </div>
+                    </a>`
+                    $('div.products').append(card);
+                });
+                page++;
+            }
+        })
+    })
 </script>

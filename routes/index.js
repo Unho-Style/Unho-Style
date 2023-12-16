@@ -4,6 +4,7 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+    req.session.userId = 1;
     if(!!req.session.userId) {
         // TODO: 가입 사용자 메인 페이지 표시
         let userInfo = userManager.getUserInfoById(req.session.userId).result;

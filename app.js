@@ -10,7 +10,10 @@ var loginRouter = require('./routes/login');
 var registerRouter = require('./routes/register');
 var writeRouter = require('./routes/write');
 var emailconfirmRouter = require('./routes/emailconfirm');
+var chatRouter = require('./routes/chat');
+var tradeRouter = require('./routes/api/trades');
 var userApiRouter = require('./routes/api/user');
+var productRouter = require('./routes/product');
 var myInfoRouter = require('./routes/myinfo');
 var fileUploadApiRouter = require('./routes/api/upload');
 
@@ -41,6 +44,9 @@ app.use('/register', registerRouter);
 app.use('/emailconfirm', emailconfirmRouter);
 app.use('/api/user', userApiRouter)
 app.use('/api/fileupload', fileUploadApiRouter);
+app.use('/product', productRouter);
+app.use('/chat', chatRouter);
+app.use('/api/trades', tradeRouter);
 app.use('/write', writeRouter)
 app.use('/myinfo', myInfoRouter)
 

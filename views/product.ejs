@@ -1,0 +1,99 @@
+<style>
+    .cardImg {
+        object-fit: cover;
+        height: 25em;
+        width: 100%;
+    }
+
+    @media only screen and (min-width: 600px) {
+        .cardImg {
+            object-fit: scale-down;
+        }
+    }
+
+    #carouselExampleControls {
+        height: 25em;
+        position: sticky;
+    }
+
+    #content {
+        word-wrap: break-word;
+    }
+
+    #imgPreview {
+        object-fit: scale-down;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .root {
+        padding: 25px;
+    }
+
+    .buttons { 
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    .buttons > div {
+        display:block;
+        margin: 0 auto;
+    }
+
+    .buttons > div > a {
+        width: 100%;
+        padding-right: 10px;
+    }
+</style>
+
+<%- include('nav', {username: username}) %>
+<div class="modal" tabindex="-1"  id="imageModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+          <img src="#" id="imgPreview">
+        </div>
+      </div>
+    </div>
+</div>
+<div class="root">
+    <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <% let images = JSON.parse(productInfo.images);
+            for(let i = 0; i < images.length; i++) { %>
+                <div class="carousel-item <%= i == 0 ? "active" : "" %>">
+                    <img src="<%=images[i]%>" class="d-block w-100 cardImg">
+                </div>
+            <% } %>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">이전</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">다음</span>
+        </button>
+    </div>
+    <div class="buttons">
+        <div>
+            <a class="btn btn-primary" href="/chat?ownerID=<%=productInfo.ownerId%>&productID=<%=productInfo.id%>">채팅</a>
+        </div>
+    </div>
+    <h2 id="title"><%=productInfo.title%></h2>
+    <h2 id="price"><%=(productInfo.price).toLocaleString('en-US')%>원</h2>
+    <hr>
+    <span id="content"><%=productInfo.content.replace('\n', '<br>')%></span>
+</div>
+
+<script>
+    $(window).on('load', () => {
+        let imgModal = new bootstrap.Modal(document.getElementById('imageModal'))
+        $(document).on('click', 'img.cardImg', (e) => {
+            //TODO: image popup
+            let src = $(e.target).attr('src')
+            $('img#imgPreview').attr('src', src);
+            imgModal.show();
+        })
+    })    
+</script>

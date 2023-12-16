@@ -21,10 +21,11 @@ router.post('/upload', (req, res) => {
         res.status(500);
         msg = '로그인하지 않았습니다.'
     } else {
-        const result = tradeManager.uploadTrade(req.session.userId, body.title, body.content, body.price, body.images)
+        const result = tradeManager.uploadTrade(req.session.userId, body.title, body.content, body.price, body.images, body.thumbnail, body.category)
         if(result.success) {
             res.status(200);
             redirID = result.id;
+            console.log(redirID)
         }else res.status(500);
     }
 

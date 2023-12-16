@@ -35,7 +35,8 @@
     }
 
     .disable {
-        color: gray;
+        color: rgb(165, 165, 165);
+        fill: rgb(165, 165, 165);
     }
 
     .cardImg {
@@ -112,6 +113,25 @@
         -o-user-select: none;
         user-select: none;
     }
+
+    div#loading {
+        background-color: rgba(0,0,0,0.5);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        color: white;
+        text-align: center;
+        z-index: 999;
+    }
+
+    div#loading > div {
+        position: relative;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
 </style>
 <!-- <script>let editor;</script> -->
 
@@ -120,11 +140,17 @@ let uploadFile = [];
 let id = 0;
 </script>
 <%- include('nav', {username: username}) %>
+<div id="loading" style="display: none;">
+    <div>
+        <h2>업로드중입니다...</h2>
+        <p>잠시만 기다려주세요</p>
+    </div>
+</div>
 <div class="root">
     <form action="javascript:upload();">
         <div class="mb-3">
             <label class="form-label">상품 이미지</label>
-            <input type="file" accept="image/*" id="file" multiple required>
+            <input type="file" accept="image/*" id="file" multiple>
             <p class="fileCnt">0/10</p>
             <div class="row overflow-x-auto overflow-y-hidden flex-nowrap" id="imgUpload">
                 <div class="col-md-3" id="addImg">
@@ -166,21 +192,8 @@ let id = 0;
 </div>
 
 <script>
-// ClassicEditor
-//     .create( document.querySelector( '#editor' ), {
-//         simpleUpload: {
-//             uploadUrl: '/api/fileupload',
-//             withCredentials: true
-//         }
-//     }).then(newEditor => {
-//         window.editor = newEditor;
-//     })
-//     .catch( error => {
-//         console.error( error );
-//     } );
-
 $(document).on('click', '#addImg', () => {
-    if(uploadFile.length > 10) {
+    if(uploadFile.length >= 10) {
         alert('사진 첨부 가능 개수는 최대 10개 입니다.');
         return;
     }
@@ -199,6 +212,7 @@ async function fileUploaded(img) {
             alert('사진 첨부 가능 개수는 최대 10개 입니다.');
             return;
         }
+        if(totalCnt >= 10) $('#addImg').addClass('disable');
         $('p.fileCnt').text(`${totalCnt}/10`);
         for(let i = 0; i < files.length; i++) {
             let e = files[i];
@@ -233,6 +247,11 @@ function removeFile(e) {
     uploadFile.splice(idx, 1);
     $('div.imgCard[data-img-id="' + targetId + '"]').remove();
     $('p.fileCnt').text(`${uploadFile.length}/10`);
+    if(uploadFile.length < 10) {
+        $('#addImg').removeClass('disable');
+    }else{
+        $('#addImg').addClass('disable');
+    }
     if(!!!uploadFile[0]?.isThumbnail) {
         if(uploadFile[0]?.isThumbnail === undefined) return;
         uploadFile[0].isThumbnail = true;
@@ -244,46 +263,71 @@ function upload() {
     let title = $('input#title').val();
     let price = $('input#price').val();
     let body  = $('textarea#editor').val();
+    let category  = $('select#category').val();
     // let body = window.editor.getData();
     console.log(title, price, body)
     if(!!!title) {
+        alert('제목을 입력해주세요.');
         return;
     }
     if(!!!body) {
+        alert('상품 설명을 입력해주세요.')
+        return;
+    }
+    if(!!!price) {
+        alert('가격을 입력해주세요.')
+        return;
+    }
+    if(!!!uploadFile.length) {
+        alert('상품 이미지를 업로드해주세요.')
         return;
     }
 
+    $('div#loading').attr('style', '');
+
     //TODO: upload product
     new Promise(async (res, rej) => {
-        // 파일 업로드
-        let fileURL = [];
-        for(let i = 0; i < uploadFile.length; i++) {
-            var data = new FormData()
-            data.append('file', uploadFile[i].file)
-            let res = await (await fetch('/api/fileupload', {
+        try {
+            // 사진 업로드
+            let fileURL = [];
+            let thumbnailURL;
+            for(let i = 0; i < uploadFile.length; i++) {
+                let data = new FormData()
+                data.append('upload', uploadFile[i].file)
+                let res = await (await fetch('/api/fileupload', {
+                    method: 'POST',
+                    body: data
+                })).json();
+                if(uploadFile[i].isThumbnail) thumbnailURL = res.url;
+                fileURL.push(res.url);
+            }
+
+            let response = (await (await fetch('/api/trades/upload', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'application/json'
                 },
-                body: data
-            })).json();
-            fileURL.push(res.url);
+                body: JSON.stringify({
+                    'title': title,
+                    'category': category,
+                    'price': price,
+                    'content': body,
+                    'images': fileURL,
+                    'thumbnail': thumbnailURL
+                })
+            })).json());
+
+            console.log(response);
+
+            res(response.id);
+        }catch(e) {
+            rej(e);
         }
-
-        let productID = await (await fetch('/api/trades/upload', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                'title': title,
-                'price': price,
-                'body': body,
-                'images': fileURL
-            })
-        })).json();
-
-        window.location.href = '/product/' + productID;
+    }).then((id) => {
+        if(!!id) window.location.href = '/product/' + id;
+        else alert('상품 업로드에 실패했습니다.')
+    }).catch(e => {
+        console.error(e);
     })
 }
 </script>

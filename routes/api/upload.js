@@ -45,34 +45,34 @@ router.post('/', function(req, res, next) {
                     }
                 });
             }else{
-                console.log(req.file);
                 let userInfo = userManager.getUserInfoById(req.session.userId).result;
                 let wmText = `UNHOS - ${userInfo.username}님의 판매글`
 
                 let filename = new Date().getTime() + '_' + req.file.originalname.normalize('NFC').replace(/ /g, '_');
                 filename = filename.substring(0, filename.lastIndexOf(".")) + '.webp';
                 let savePath = path.join(appRoot, 'public', 'files', filename);
-                console.log(savePath);
-                let width = await require('image-size')(req.file.buffer).width;
+                let imgSize = await require('image-size')(req.file.buffer);
                 const watermark = await sharp({
                     text: {
                         text: `<span foreground="#bdbdbd80">${wmText}</span>`,
-                        font: 'sans',
+                        fontfile: path.join(appRoot, 'NotoSansKR-Bold.ttf'),
                         align: 'center',
-                        width: width,
-                        // height: 14,
+                        width: imgSize.width,
+                        height: imgSize.height * 0.05,
                         rgba: true,
-                        dpi: 150
+                        // dpi: 150
                     }
                 }).png().toBuffer();
                 await sharp(req.file.buffer).composite([{
                     input: watermark,
                     gravity: 'center'
-                }]).webp().toFile(savePath);
+                }]).webp({
+                    quality: 90
+                }).toFile(savePath);
 
                 res.send({
                     'status': res.statusCode,
-                    'url': '/files/' + req.file.filename,
+                    'url': '/files/' + filename,
                 });
 			}
 		});
