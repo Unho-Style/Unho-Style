@@ -7,14 +7,15 @@ var path = require('path');
 var fs = require('fs')
 const appRoot = require('app-root-path').path;
 
-var storage = multer.diskStorage({
-	destination: function (req, file, cb) {
-		cb(null, path.join(appRoot, 'public', 'files'));
-	},
-	filename: function (req, file, cb) {
-		cb(null, new Date().getTime() + '_' + file.originalname.normalize('NFC').replace(/ /g, '_'));
-	}
-});
+// var storage = multer.diskStorage({
+// 	destination: function (req, file, cb) {
+// 		cb(null, path.join(appRoot, 'public', 'files'));
+// 	},
+// 	filename: function (req, file, cb) {
+//         let filename = new Date().getTime() + '_' + file.originalname.normalize('NFC').replace(/ /g, '_');
+// 		cb(null, filename.substring(0, filename.lastIndexOf(".")) + '.webp');
+// 	}
+// });
 
 if(!fs.existsSync(path.join(appRoot, 'public', 'files'))) {
     fs.mkdirSync(path.join(appRoot, 'public', 'files'));
@@ -22,13 +23,11 @@ if(!fs.existsSync(path.join(appRoot, 'public', 'files'))) {
 
 
 
-var upload = multer({
-	storage: storage
-});
+var upload = multer();
 
 router.post('/', function(req, res, next) {
 	if(!!req.session.userId) {
-		upload.single('upload')(req, res, (err) => {
+		upload.single('upload')(req, res, async (err) => {
 			if(!req.file) {
 				res.status(400);
 				res.send({
@@ -46,24 +45,31 @@ router.post('/', function(req, res, next) {
                     }
                 });
             }else{
-                //console.log(req.upload.filename);
+                console.log(req.file);
                 let userInfo = userManager.getUserInfoById(req.session.userId).result;
                 let wmText = `UNHOS - ${userInfo.username}님의 판매글`
-                let savePath = path.join(appRoot, 'public', 'files', req.file.filename);
+
+                let filename = new Date().getTime() + '_' + req.file.originalname.normalize('NFC').replace(/ /g, '_');
+                filename = filename.substring(0, filename.lastIndexOf(".")) + '.webp';
+                let savePath = path.join(appRoot, 'public', 'files', filename);
                 console.log(savePath);
-                sharp(savePath, {
+                let width = await require('image-size')(req.file.buffer).width;
+                const watermark = await sharp({
                     text: {
-                        text: `<span style="color: rgba(255, 255, 255, 0.5);">${wmText}</span>`,
+                        text: `<span foreground="#bdbdbd80">${wmText}</span>`,
                         font: 'sans',
+                        align: 'center',
+                        width: width,
+                        // height: 14,
                         rgba: true,
-                        dpi: 300
+                        dpi: 150
                     }
-                }).toFile(savePath);
-                // watermark.embedWatermark(savePath,
-                // {
-                //     'text': wmText,
-                //     'override-image': true
-                // })
+                }).png().toBuffer();
+                await sharp(req.file.buffer).composite([{
+                    input: watermark,
+                    gravity: 'center'
+                }]).webp().toFile(savePath);
+
                 res.send({
                     'status': res.statusCode,
                     'url': '/files/' + req.file.filename,
