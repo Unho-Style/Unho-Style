@@ -4,6 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var session = require('express-session');
+const { Server } = require('socket.io');
+const io = new Server();
 
 var indexRouter = require('./routes/index');
 var loginRouter = require('./routes/login');
@@ -11,11 +13,12 @@ var registerRouter = require('./routes/register');
 var writeRouter = require('./routes/write');
 var emailconfirmRouter = require('./routes/emailconfirm');
 var chatRouter = require('./routes/chat');
-var tradeRouter = require('./routes/api/trades');
+var fileUploadApiRouter = require('./routes/api/upload');
+var tradeApiRouter = require('./routes/api/trades');
 var userApiRouter = require('./routes/api/user');
+var chatApiRouter = require('./routes/api/chat')(io);
 var productRouter = require('./routes/product');
 var myInfoRouter = require('./routes/myinfo');
-var fileUploadApiRouter = require('./routes/api/upload');
 
 var app = express();
 
@@ -23,11 +26,7 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(session({
+let sessionMiddleware = session({
     secret: 'fuck1ng! str0ng_pa55w0rd123',
     resave: false,
     saveUninitialized: true,
@@ -35,20 +34,31 @@ app.use(session({
 	    httpOnly: true,
         maxAge: 86400000
     }
-}));
+});
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(sessionMiddleware);
 app.use(express.static(path.join(__dirname, 'public')));
+
+io.engine.use(sessionMiddleware);
 
 app.use('/', indexRouter);
 app.use('/login', loginRouter);
 app.use('/register', registerRouter);
 app.use('/emailconfirm', emailconfirmRouter);
-app.use('/api/user', userApiRouter)
+app.use('/api/user', userApiRouter);
 app.use('/api/fileupload', fileUploadApiRouter);
+app.use('/api/chat', chatApiRouter);
+app.use('/api/trades', tradeApiRouter);
 app.use('/product', productRouter);
 app.use('/chat', chatRouter);
-app.use('/api/trades', tradeRouter);
-app.use('/write', writeRouter)
-app.use('/myinfo', myInfoRouter)
+app.use('/write', writeRouter);
+app.use('/myinfo', myInfoRouter);
+
+app.io = io;
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
