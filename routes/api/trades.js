@@ -49,6 +49,19 @@ router.get('/get', (req, res) => {
     });
 });
 
+router.get('/getTradeInfo', (req, res) => {
+    let tradeId = req.query.tradeId;
+    const result = tradeManager.getTrade(tradeId);
+
+    if(result.success) res.status(200);
+    else res.status(500);
+
+    res.json({
+        status: res.statusCode,
+        result: result?.result
+    });
+});
+
 router.delete('/remove', (req, res) => {
     try {
         const body = req.body;

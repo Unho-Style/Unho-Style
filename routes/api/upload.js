@@ -59,7 +59,8 @@ router.post('/', function(req, res, next) {
                     const watermark = await sharp({
                         text: {
                             text: `<span foreground="#bdbdbd80">${wmText}</span>`,
-                            fontfile: path.join(appRoot, 'NotoSansKR-Bold.ttf'),
+                            // fontfile: path.join(appRoot, 'NotoSansKR-Bold.ttf'),
+                            font: 'sans',
                             align: 'center',
                             width: imgSize.width,
                             height: imgSize.height * 0.05,

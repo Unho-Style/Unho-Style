@@ -99,7 +99,7 @@
             }
         }).then(async res => {
             let data = await res.json();
-            if(data.status == 200) window.location.href = '/chat?chatId=' + data.chat_id;
+            if(data.status == 200) window.location.href = '/chat?chatId=' + data.chat_id + '&tradeId=<%=productInfo.id%>';
             else alert(data.error.message);
         })
     })

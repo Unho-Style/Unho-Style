@@ -11,8 +11,41 @@
         margin-top: 10px;
     }
 
+    .productInfo {
+        display: flex;
+        align-items: center;
+        height: 5em;
+        background-color: lightgray;
+        padding: 10px 0 10px 0;
+    }
+
+    .productInfo > div {
+        margin-left: 10px;
+        /* vertical-align: middle; */
+    }
+
+    #productImg {
+        aspect-ratio : 1 / 1;
+        height: 100%;
+        object-fit: cover;
+        margin-left: 10px;
+        /* margin-top: -10px; */
+    }
+
+    #backBtn {
+        margin-left: 10px;
+        /* vertical-align: middle; */
+        text-decoration: none;
+    }
+
     #send {
         width: 100%;
+    }
+
+    #buy {
+        margin-left: auto;
+        margin-right: 10px;
+        /* vertical-align: middle; */
     }
 
     .chat {
@@ -32,16 +65,29 @@
 
     .scroll {
         overflow-y: auto;
-        height: 90%;
+        height: calc(100% - 8.5em);
     }
 
     .bubble {
         max-width: 80%;
         width: fit-content;
+        margin: 10px;
+    }
+
+    .bubbleText {
+        display: inline-block;
+        max-width: 100%;
+        width: fit-content;
         border-radius: 10px;
         border: lightgray solid 1px;
-        margin: 10px;
         padding: 10px;
+    }
+
+    .timestamp {
+        color:rgb(172, 172, 172);
+        font-size: 0.8em;
+        vertical-align: bottom;
+        margin: 0 5px 0 5px;
     }
 
     .text {
@@ -58,16 +104,21 @@
 </style>
 <%- include('nav') %>
 <div class="root">
-    <div class="chat hide">
+    <div class="chat">
         <div class="productInfo">
+            <a id="backBtn" href="#">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="black" class="bi bi-arrow-left-short" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/>
+                </svg>
+            </a>
+            <img src="/files/1702891516771_photo-1505740420928-5e560c06d30e.webp" id="productImg">
+            <div style="display: inline-block;">
+                <span id="productName">존1나 개쩌는 상품</span><br>
+                <span id="productPrice" class="h5">100,000원</span>
+            </div>
+            <button class="btn btn-primary" id="buy">예약하기</button>
         </div>
         <div class="scroll">
-            <div class="bubble left">
-                안녕하세요
-            </div>
-            <div class="bubble right">
-                안녕하세요^^
-            </div>
         </div>
         <div class="text">
             <div class="container-fluid">
@@ -82,7 +133,7 @@
             </div>
         </div>
     </div>
-    <div class="chatlist">
+    <div class="chatlist hide">
         
     </div>
 </div>
@@ -97,25 +148,96 @@
         $('div.chat').addClass('hide');
         $('div.chatlist').removeClass('hide');
     }
-    $(window).on('load', () => {
-        let chat_id = window.location.href.match(/\id=[0-9]+/g);
-        if(!!chat_id) {
-            chat_id = chat_id.split('=')[1];
-            showBubble();
-        }else fetch('/api/chat/getChats').then(async res => {
-            let data = await res.json().data;
-            if(!!data?.length) forEach((e) => {
-                let card = `<a class="card chatCard" href="#" data-chatID="${e.chat_id}">
-                    <div class="card-body">
-                        <h5 class="card-title">${e.username}</h5>
-                        <p class="card-text">${e.last_message}</p>
-                    </div>
-                </a>`
-                $('div.chatlist').append(card);
-            });
-            else {
+
+    $(document).on('click', 'a#backBtn', (e) => {
+        showChatList();
+        loadChatList();
+    })
+
+    $(document).on('click', 'a.chatCard', (e) => {
+        console.log()
+        let chatId = $(e.target.parentElement.parentElement).attr('data-chatid');
+        let tradeId = $(e.target.parentElement.parentElement).attr('data-tradeid');
+        console.log(chatId, tradeId);
+        loadMessages(chatId, tradeId);
+        showBubble();
+    })
+
+    function loadChatList() {
+        $('div.chatList').html('');
+        fetch('/api/chat/getChats').then(async res => {
+            let data = (await res.json()).data;
+            // console.log(data);
+            if(!!data?.length) {
+                data.forEach((e) => {
+                let card = `<a class="card chatCard" href="#" data-chatid="${e.chat_id}" data-tradeid="${e.trade_id}">
+                        <div class="card-body">
+                            <h5 class="card-title">${e.username}</h5>
+                            <p class="card-text">${e.last_message}</p>
+                        </div>
+                    </a>`
+                    $('div.chatlist').append(card);
+                });
+            } else {
                 $('div.chatlist').append('<span class="nochat">아직 조용하군요..</span>');
             }
         });
+    }
+
+    /**
+     * @param {Date} date
+     */
+    function dateToString(date) {
+        return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    }
+
+    function loadMessages(chatId, tradeId) {
+        $('div.scroll').html('');
+        
+        // 상품 정보 로딩
+        fetch('/api/trades/getTradeInfo?tradeId=' + tradeId).then(async res => {
+            let data = (await res.json()).result;
+            
+            $('span#productName').text(data.title)
+            $('span#productPrice').text(`${data.price.toLocaleString('en-US')}원`);
+            $('img#productImg').attr('src', data.thumbnail);
+        });
+
+        // 메시지 내역 로딩
+        fetch('/api/chat/getMessages?chatId=' + chatId).then(async res => {
+            let data = (await res.json()).data;
+            if(!!data?.length) {
+                data.forEach((e) => {
+                let date = new Date(e.timestamp);
+                let card = `<div class="bubble ${e.isMe ? "right" : "left"}">
+                    ${e.isMe ? `<span class="timestamp">${dateToString(date)}</span>` : ''}
+                    <div class="bubbleText">
+                        안녕하세요^^
+                    </div>
+                    ${!e.isMe ? `<span class="timestamp">${dateToString(date)}</span>` : ''}
+                    </div>`
+                    $('div.scroll').append(card);
+                });
+            } else {
+                // $('div.scroll').append('<span class="nochat">아직 조용하군요..</span>');
+            }
+        });
+    }
+
+    $(window).on('load', () => {
+        // return;
+        let chat_id = window.location.href.match(/chatId=[0-9]+/g);
+        let trade_id = window.location.href.match(/tradeId=[0-9]+/g);
+        if(!!chat_id?.length && !!trade_id?.length) {
+            console.log(chat_id);
+            console.log(trade_id);
+            chat_id = chat_id[0].split('=')[1];
+            trade_id = trade_id[0].split('=')[1];
+            showBubble();
+            loadMessages(chat_id, trade_id);
+        }else {
+            showChatList();
+            loadChatList();
+        }
     })
 </script>
