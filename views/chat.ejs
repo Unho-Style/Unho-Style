@@ -20,6 +20,16 @@
         height: 100%;
     }
 
+    .chatCard { 
+        text-decoration: none;
+    }
+
+    .nochat {
+        display:block;
+        text-align: center;
+        margin-top: 10px;
+    }
+
     .scroll {
         overflow-y: auto;
         height: 90%;
@@ -48,7 +58,7 @@
 </style>
 <%- include('nav') %>
 <div class="root">
-    <div class="chat">
+    <div class="chat hide">
         <div class="productInfo">
         </div>
         <div class="scroll">
@@ -72,16 +82,40 @@
             </div>
         </div>
     </div>
-    <div class="chatlist hide">
-        <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">bass9030</h5>
-              <p class="card-text">안녕하세요</p>
-            </div>
-        </div>
+    <div class="chatlist">
+        
     </div>
 </div>
-<script src="/socket.io/socket.io.js"></script>
+<!-- <script src="/socket.io/socket.io.js"></script> -->
 <script>
-    
+    function showBubble() {
+        $('div.chat').removeClass('hide');
+        $('div.chatlist').addClass('hide');
+    }
+
+    function showChatList() {
+        $('div.chat').addClass('hide');
+        $('div.chatlist').removeClass('hide');
+    }
+    $(window).on('load', () => {
+        let chat_id = window.location.href.match(/\id=[0-9]+/g);
+        if(!!chat_id) {
+            chat_id = chat_id.split('=')[1];
+            showBubble();
+        }else fetch('/api/chat/getChats').then(async res => {
+            let data = await res.json().data;
+            if(!!data?.length) forEach((e) => {
+                let card = `<a class="card chatCard" href="#" data-chatID="${e.chat_id}">
+                    <div class="card-body">
+                        <h5 class="card-title">${e.username}</h5>
+                        <p class="card-text">${e.last_message}</p>
+                    </div>
+                </a>`
+                $('div.chatlist').append(card);
+            });
+            else {
+                $('div.chatlist').append('<span class="nochat">아직 조용하군요..</span>');
+            }
+        });
+    })
 </script>

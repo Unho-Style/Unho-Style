@@ -6,6 +6,17 @@ const userManager = require('../../lib/userManager');
 
 //const 구목록 = ['상당구', '서원구', '흥덕구', '청원구', '시외'];
 
+// router.get('/getUsername', (req, res) => {
+//     if(!!!req.session.userId) {
+//         res.status(403).json({status: res.statusCode});
+//         return;
+//     }
+
+//     let data = userManager.getUserInfoById(req.query.id);
+//     if(data.success) res.status(200).json({status: res.statusCode, data: data.result.username});
+//     else res.status(500).json({status: res.statusCode});
+// })
+
 router.post('/register', (req, res) => {
     const body = req.body;
     if(!!!body) {
@@ -41,7 +52,7 @@ router.patch('/update', (req, res) => {
     }
     let msg;
     if(!!!req.session.userId) {
-        res.status(500);
+        res.status(403);
         msg = '로그인하지 않았습니다.'
     } else {
         let userInfo = userManager.getUserInfoById(req.session.userId);

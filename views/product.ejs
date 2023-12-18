@@ -77,7 +77,7 @@
     </div>
     <div class="buttons">
         <div>
-            <a class="btn btn-primary" href="/chat?ownerID=<%=productInfo.ownerId%>&productID=<%=productInfo.id%>">채팅</a>
+            <a id="createChat" class="btn btn-primary" href="#">채팅</a>
         </div>
     </div>
     <h2 id="title"><%=productInfo.title%></h2>
@@ -87,6 +87,23 @@
 </div>
 
 <script>
+    $(document).on('click', 'a#createChat', () => {
+        fetch('/api/chat/createChat', {
+            method: 'POST',
+            body: JSON.stringify({
+                ownerId: "<%=productInfo.ownerId%>",
+                tradeId: "<%=productInfo.id%>"
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(async res => {
+            let data = await res.json();
+            if(data.status == 200) window.location.href = '/chat?chatId=' + data.chat_id;
+            else alert(data.error.message);
+        })
+    })
+
     $(window).on('load', () => {
         let imgModal = new bootstrap.Modal(document.getElementById('imageModal'))
         $(document).on('click', 'img.cardImg', (e) => {
