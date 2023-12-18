@@ -118,6 +118,20 @@ router.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
+router.post('/pushSubscribe', (req, res) => {
+    try {
+        let subscribeInfo = req.body;
+        userManager.subscribePushNoti(req.session.userId, subscribeInfo);
+        res.status(200).json({
+            status: res.statusCode
+        })
+    }catch{
+        res.status(500).json({
+            status: res.statusCode
+        });
+    }
+})
+
 router.post('/emailconfirm', (req, res) => {
     const body = req.body;
     if(!!!body) {

@@ -4,7 +4,6 @@ var router = express.Router();
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-    req.session.userId = 1;
     if (!!!req.session.userId) {
         res.redirect('/')
     }else{

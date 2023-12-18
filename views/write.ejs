@@ -283,6 +283,7 @@ function upload() {
         return;
     }
 
+    window.scrollTo(0, 0);
     $('div#loading').attr('style', '');
 
     //TODO: upload product
@@ -325,7 +326,10 @@ function upload() {
         }
     }).then((id) => {
         if(!!id) window.location.href = '/product/' + id;
-        else alert('상품 업로드에 실패했습니다.')
+        else {
+            alert('상품 업로드에 실패했습니다.');
+            $('div#loading').attr('style', 'display: none;');
+        }
     }).catch(e => {
         console.error(e);
     })

@@ -5,7 +5,6 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/:productID', function(req, res, next) {
-    req.session.userId = 1;
     if(!!req.session.userId) {
         let userInfo = userManager.getUserInfoById(req.session.userId).result;
         if(userInfo.isAuthed == 1) {
@@ -17,7 +16,7 @@ router.get('/:productID', function(req, res, next) {
             res.redirect('/emailconfirm')
         }
     }else{
-        res.redirect('/')
+        res.redirect('/login')
     }
 });
 

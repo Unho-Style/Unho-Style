@@ -45,35 +45,46 @@ router.post('/', function(req, res, next) {
                     }
                 });
             }else{
-                let userInfo = userManager.getUserInfoById(req.session.userId).result;
-                let wmText = `UNHOS - ${userInfo.username}님의 판매글`
+                try {
+                    let userInfo = userManager.getUserInfoById(req.session.userId).result;
+                    let wmText = `UNHOS - ${userInfo.username}님의 판매글`
+                    let convertFile = await sharp(req.file.buffer).webp({
+                        quality: 90
+                    }).toBuffer();
+                    let filename = new Date().getTime() + '_' + req.file.originalname.normalize('NFC').replace(/ /g, '_');
+                    filename = filename.substring(0, filename.lastIndexOf(".")) + '.webp';
+                    let savePath = path.join(appRoot, 'public', 'files', filename);
+                    let imgSize = await require('image-size')(convertFile);
+                    console.log(path.join(appRoot, 'NotoSansKR-Bold.ttf'));
+                    const watermark = await sharp({
+                        text: {
+                            text: `<span foreground="#bdbdbd80">${wmText}</span>`,
+                            fontfile: path.join(appRoot, 'NotoSansKR-Bold.ttf'),
+                            align: 'center',
+                            width: imgSize.width,
+                            height: imgSize.height * 0.05,
+                            rgba: true,
+                            // dpi: 150
+                        }
+                    }).png().toBuffer();
+                    await sharp(convertFile).composite([{
+                        input: watermark,
+                        gravity: 'center'
+                    }]).webp().toFile(savePath);
 
-                let filename = new Date().getTime() + '_' + req.file.originalname.normalize('NFC').replace(/ /g, '_');
-                filename = filename.substring(0, filename.lastIndexOf(".")) + '.webp';
-                let savePath = path.join(appRoot, 'public', 'files', filename);
-                let imgSize = await require('image-size')(req.file.buffer);
-                const watermark = await sharp({
-                    text: {
-                        text: `<span foreground="#bdbdbd80">${wmText}</span>`,
-                        fontfile: path.join(appRoot, 'NotoSansKR-Bold.ttf'),
-                        align: 'center',
-                        width: imgSize.width,
-                        height: imgSize.height * 0.05,
-                        rgba: true,
-                        // dpi: 150
-                    }
-                }).png().toBuffer();
-                await sharp(req.file.buffer).composite([{
-                    input: watermark,
-                    gravity: 'center'
-                }]).webp({
-                    quality: 90
-                }).toFile(savePath);
-
-                res.send({
-                    'status': res.statusCode,
-                    'url': '/files/' + filename,
-                });
+                    res.send({
+                        'status': res.statusCode,
+                        'url': '/files/' + filename,
+                    });
+                }catch(e){
+                    console.error(e);
+                    res.status(500).json({
+                        status: res.statusCode,
+                        error: {
+                            message: '파일 업로드에 실패했습니다.',
+                        }
+                    })
+                }
 			}
 		});
 	}else{

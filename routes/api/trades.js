@@ -18,7 +18,7 @@ router.post('/upload', (req, res) => {
     }
 
     if(!!!req.session.userId) {
-        res.status(500);
+        res.status(403);
         msg = '로그인하지 않았습니다.'
     } else {
         const result = tradeManager.uploadTrade(req.session.userId, body.title, body.content, body.price, body.images, body.thumbnail, body.category)

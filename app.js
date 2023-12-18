@@ -43,7 +43,8 @@ app.use(cookieParser());
 app.use(sessionMiddleware);
 app.use(express.static(path.join(__dirname, 'public')));
 
-io.engine.use(sessionMiddleware);
+var ios = require("express-socket.io-session");
+io.use(ios(sessionMiddleware, { autoSave:true }));
 
 app.use('/', indexRouter);
 app.use('/login', loginRouter);
