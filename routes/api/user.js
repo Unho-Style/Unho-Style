@@ -130,6 +130,10 @@ router.get('/logout', (req, res) => {
 });
 
 router.post('/pushSubscribe', (req, res) => {
+    if(!!!req.session.userId) {
+        res.status(403).send();
+        return
+    }
     try {
         let subscribeInfo = req.body;
         userManager.subscribePushNoti(req.session.userId, subscribeInfo);

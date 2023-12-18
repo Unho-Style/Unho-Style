@@ -52,9 +52,14 @@ module.exports = (io) => {
             res.status(400).json({status: res.statusCode, error: {message: '자신이 판매중인 상품에는 채팅을 걸 수 없습니다.'}});
             return;
         }
-        let data = chatManager.createChat(tradeId, ownerId, buyerId)
-        if(data.success) res.status(200).json({status: res.statusCode, chat_id: data.chat_id});
-        else res.status(500).json({status: res.statusCode});
+        let prevChatID = chatManager.getChatIdFor(tradeId, ownerId, buyerId);
+        if(prevChatID.success) {
+            res.status(200).json({status: res.statusCode, chat_id: prevChatID.chat_id});
+        }else {
+            let data = chatManager.createChat(tradeId, ownerId, buyerId);
+            if(data.success) res.status(200).json({status: res.statusCode, chat_id: data.chat_id});
+            else res.status(500).json({status: res.statusCode});
+        }
     })
 
     router.post('/sendMessage', (req, res) => {
@@ -65,12 +70,12 @@ module.exports = (io) => {
         let chatId = req.body?.chatId
         let content = req.body?.content
         let senderId = req.session.userId;
-        if(!!!chatid || !!!content) {
+        if(!!!chatId || !!!content) {
             res.status(400).json({status: res.statusCode});
             return;
         }
         let data = chatManager.sendMessage(chatId, senderId, content);
-        if(data.success) res.status(200).json({status: res.statusCode, chat_id: data.chat_id});
+        if(data.success) res.status(200).json({status: res.statusCode});
         else res.status(500).json({status: res.statusCode});
     })
 

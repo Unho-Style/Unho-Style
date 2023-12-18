@@ -17,5 +17,37 @@
     <%- include(view) %>
     <script src="https://kit.fontawesome.com/c29a40570f.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function subscribePushNoti(e) {
+            let subInfo = await e.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: 'BEDsLs9cv6cCJFkfMuCKjVGKnKpJIfXrzztxTErDO8P_MouQpc4g3DAjiQaj3QVYU3QxH_0I-kYF2Cc-ZDbFaPU'
+            });
+            let res = await (await fetch('/api/user/pushSubscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(subInfo)
+            })).json()
+
+            localStorage.setItem('isSubscribed', true);
+        }
+
+        if('serviceWorker' in navigator && 'Notification' in window && 'PushManager' in window) {
+            navigator.serviceWorker.register('/js/sw.js').then(e => {
+                // if(localStorage.getItem('isSubscribed') == 'true') return;
+                if(Notification.permission == 'default') {
+                    Notification.requestPermission((permission) => {
+                        if(permission == 'granted') {
+                            subscribePushNoti(e);
+                        }
+                    });
+                }else if(Notification.permission == 'granted') {
+                    subscribePushNoti(e);
+                }
+            });
+        };
+    </script>
 </body>
 </html>

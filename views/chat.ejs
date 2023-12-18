@@ -69,6 +69,7 @@
     }
 
     .bubble {
+        /* display:block; */
         max-width: 80%;
         width: fit-content;
         margin: 10px;
@@ -95,7 +96,7 @@
     }
 
     .right {
-        float: right;
+        margin-left: auto;
     }
 
     .hide {
@@ -139,6 +140,8 @@
 </div>
 <!-- <script src="/socket.io/socket.io.js"></script> -->
 <script>
+    let currentChatId = -1;
+
     function showBubble() {
         $('div.chat').removeClass('hide');
         $('div.chatlist').addClass('hide');
@@ -149,13 +152,38 @@
         $('div.chatlist').removeClass('hide');
     }
 
+    $(document).on('keydown', 'input#chatText', (e) => {
+        if(e.key == 'Enter') $('button#send').click();
+        console.log(e);
+    })
+
+    $(document).on('click', 'button#send', (e) => {
+        let content = $('input#chatText').val();
+        if(!!!content) return;
+        fetch('/api/chat/sendMessage', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chatId: currentChatId,
+                content: content
+            })
+        }).then(async res => {
+            let data = await res.json();
+            if(data.status != 200) {
+                alert('메시지 전송에 실패했습니다.')
+            }
+        });
+    })
+
     $(document).on('click', 'a#backBtn', (e) => {
+        currentChatId = -1;
         showChatList();
         loadChatList();
     })
 
     $(document).on('click', 'a.chatCard', (e) => {
-        console.log()
         let chatId = $(e.target.parentElement.parentElement).attr('data-chatid');
         let tradeId = $(e.target.parentElement.parentElement).attr('data-tradeid');
         console.log(chatId, tradeId);
@@ -193,7 +221,7 @@
 
     function loadMessages(chatId, tradeId) {
         $('div.scroll').html('');
-        
+        currentChatId = chatId;
         // 상품 정보 로딩
         fetch('/api/trades/getTradeInfo?tradeId=' + tradeId).then(async res => {
             let data = (await res.json()).result;
@@ -212,7 +240,7 @@
                 let card = `<div class="bubble ${e.isMe ? "right" : "left"}">
                     ${e.isMe ? `<span class="timestamp">${dateToString(date)}</span>` : ''}
                     <div class="bubbleText">
-                        안녕하세요^^
+                        ${e.content}
                     </div>
                     ${!e.isMe ? `<span class="timestamp">${dateToString(date)}</span>` : ''}
                     </div>`
