@@ -16,7 +16,8 @@
         position: sticky;
     }
 
-    #content {
+    .content {
+        display:block;
         word-wrap: break-word;
     }
 
@@ -77,13 +78,15 @@
     </div>
     <div class="buttons">
         <div>
-            <a id="createChat" class="btn btn-primary" href="#">채팅</a>
+            <a id="createChat" class="btn btn-primary <%=productInfo.status != 0 ? "disabled" : ""%>" href="#">채팅</a>
         </div>
     </div>
     <h2 id="title"><%=productInfo.title%></h2>
     <h2 id="price"><%=(productInfo.price).toLocaleString('en-US')%>원</h2>
     <hr>
-    <span id="content"><%=productInfo.content.replace('\n', '<br>')%></span>
+    <%productInfo.content.split('\n').forEach((e) => {%>
+    <span class="content"><%=e%></span>
+    <%});%>
 </div>
 
 <script>
@@ -99,7 +102,7 @@
             }
         }).then(async res => {
             let data = await res.json();
-            if(data.status == 200) window.location.href = '/chat?chatId=' + data.chat_id + '&tradeId=<%=productInfo.id%>';
+            if(data.status == 200) window.location.href = '/message?chatid=' + data.chat_id;
             else alert(data.error.message);
         })
     })

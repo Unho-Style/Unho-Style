@@ -1,0 +1,13 @@
+{
+    "name": "UnhoStyle",
+    "short_name": "UnhoStyle",
+    "icons": [{
+      "src": "/icon.png",
+      "sizes": "350x350",
+      "type": "image/png"
+    }],
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#FFFFFF",
+    "theme_color": "#FFFFFF"
+  }

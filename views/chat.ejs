@@ -3,6 +3,7 @@
     .root {
         width: 100%;
         height: calc(100vh - 3.5em);
+        padding: 10px;
     }
 
     .selectChat {
@@ -55,6 +56,7 @@
 
     .chatCard { 
         text-decoration: none;
+        margin-bottom: 10px;
     }
 
     .nochat {
@@ -105,92 +107,13 @@
 </style>
 <%- include('nav') %>
 <div class="root">
-    <div class="chat">
-        <div class="productInfo">
-            <a id="backBtn" href="#">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="black" class="bi bi-arrow-left-short" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/>
-                </svg>
-            </a>
-            <img src="/files/1702891516771_photo-1505740420928-5e560c06d30e.webp" id="productImg">
-            <div style="display: inline-block;">
-                <span id="productName">존1나 개쩌는 상품</span><br>
-                <span id="productPrice" class="h5">100,000원</span>
-            </div>
-            <button class="btn btn-primary" id="buy">예약하기</button>
-        </div>
-        <div class="scroll">
-        </div>
-        <div class="text">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-10">
-                        <input id="chatText" class="form-control" type="text">
-                    </div>
-                    <div class="col-2">
-                        <button class="btn btn-primary" id="send">전송</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="chatlist hide">
+    <h4 style="margin-bottom: 15px;">채팅 목록</h4>
+    <div class="chatlist">
         
     </div>
 </div>
 <!-- <script src="/socket.io/socket.io.js"></script> -->
 <script>
-    let currentChatId = -1;
-
-    function showBubble() {
-        $('div.chat').removeClass('hide');
-        $('div.chatlist').addClass('hide');
-    }
-
-    function showChatList() {
-        $('div.chat').addClass('hide');
-        $('div.chatlist').removeClass('hide');
-    }
-
-    $(document).on('keydown', 'input#chatText', (e) => {
-        if(e.key == 'Enter') $('button#send').click();
-        console.log(e);
-    })
-
-    $(document).on('click', 'button#send', (e) => {
-        let content = $('input#chatText').val();
-        if(!!!content) return;
-        fetch('/api/chat/sendMessage', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                chatId: currentChatId,
-                content: content
-            })
-        }).then(async res => {
-            let data = await res.json();
-            if(data.status != 200) {
-                alert('메시지 전송에 실패했습니다.')
-            }
-        });
-    })
-
-    $(document).on('click', 'a#backBtn', (e) => {
-        currentChatId = -1;
-        showChatList();
-        loadChatList();
-    })
-
-    $(document).on('click', 'a.chatCard', (e) => {
-        let chatId = $(e.target.parentElement.parentElement).attr('data-chatid');
-        let tradeId = $(e.target.parentElement.parentElement).attr('data-tradeid');
-        console.log(chatId, tradeId);
-        loadMessages(chatId, tradeId);
-        showBubble();
-    })
-
     function loadChatList() {
         $('div.chatList').html('');
         fetch('/api/chat/getChats').then(async res => {
@@ -198,7 +121,7 @@
             // console.log(data);
             if(!!data?.length) {
                 data.forEach((e) => {
-                let card = `<a class="card chatCard" href="#" data-chatid="${e.chat_id}" data-tradeid="${e.trade_id}">
+                let card = `<a class="card chatCard" href="/message?chatid=${e.chat_id}">
                         <div class="card-body">
                             <h5 class="card-title">${e.username}</h5>
                             <p class="card-text">${e.last_message}</p>
@@ -219,53 +142,7 @@
         return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
     }
 
-    function loadMessages(chatId, tradeId) {
-        $('div.scroll').html('');
-        currentChatId = chatId;
-        // 상품 정보 로딩
-        fetch('/api/trades/getTradeInfo?tradeId=' + tradeId).then(async res => {
-            let data = (await res.json()).result;
-            
-            $('span#productName').text(data.title)
-            $('span#productPrice').text(`${data.price.toLocaleString('en-US')}원`);
-            $('img#productImg').attr('src', data.thumbnail);
-        });
-
-        // 메시지 내역 로딩
-        fetch('/api/chat/getMessages?chatId=' + chatId).then(async res => {
-            let data = (await res.json()).data;
-            if(!!data?.length) {
-                data.forEach((e) => {
-                let date = new Date(e.timestamp);
-                let card = `<div class="bubble ${e.isMe ? "right" : "left"}">
-                    ${e.isMe ? `<span class="timestamp">${dateToString(date)}</span>` : ''}
-                    <div class="bubbleText">
-                        ${e.content}
-                    </div>
-                    ${!e.isMe ? `<span class="timestamp">${dateToString(date)}</span>` : ''}
-                    </div>`
-                    $('div.scroll').append(card);
-                });
-            } else {
-                // $('div.scroll').append('<span class="nochat">아직 조용하군요..</span>');
-            }
-        });
-    }
-
     $(window).on('load', () => {
-        // return;
-        let chat_id = window.location.href.match(/chatId=[0-9]+/g);
-        let trade_id = window.location.href.match(/tradeId=[0-9]+/g);
-        if(!!chat_id?.length && !!trade_id?.length) {
-            console.log(chat_id);
-            console.log(trade_id);
-            chat_id = chat_id[0].split('=')[1];
-            trade_id = trade_id[0].split('=')[1];
-            showBubble();
-            loadMessages(chat_id, trade_id);
-        }else {
-            showChatList();
-            loadChatList();
-        }
+        loadChatList();
     })
 </script>

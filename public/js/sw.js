@@ -3,11 +3,12 @@ const channel = new BroadcastChannel('noti')
 
 self.addEventListener('push', function (event) {
     const data = JSON.parse(event.data.text());
+    channel.postMessage(data);
     event.waitUntil(async function() {
-        registration.showNotification( data.title, {
+        registration.showNotification( data.senderUsername, {
             body: data.content,
             data: {
-                link: data.link
+                link: `/message?chatid=${data.chatId}`
             },
             vibrate: [100, 100, 100],
         })
@@ -15,5 +16,6 @@ self.addEventListener('push', function (event) {
 });
 
 self.addEventListener("notificationclick", (event) => {
-    clients.openWindow(event.data.link);
+    console.log(event.notification);
+    clients.openWindow(event.notification.data.link).then(console.log).catch(console.error);
 });

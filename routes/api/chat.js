@@ -15,6 +15,16 @@ module.exports = (io) => {
         else res.status(500).json({status: res.statusCode});        
     });
 
+    router.get('/getChatById', (req, res) => {
+        if(!!!req.session.userId) {
+            res.status(403).json({status: res.statusCode});
+            return;
+        }
+        const data = chatManager.getChatByChatId(req.query.chatId);
+        if(data.success) res.status(200).json({status: res.statusCode, data: data.result});
+        else res.status(500).json({status: res.statusCode});        
+    });
+
     router.get('/getMessages', (req, res) => {
         if(!!!req.session.userId) {
             res.status(403).json({status: res.statusCode});

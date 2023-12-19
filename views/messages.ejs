@@ -1,0 +1,288 @@
+<!-- we are fucked up -->
+<style>
+    .root {
+        width: 100%;
+        height: calc(100vh - 3.5em);
+    }
+
+    .selectChat {
+        display:block;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .productInfo > * {
+        vertical-align: middle;
+    }
+
+    .productInfo {
+        display: fixed;
+        top:0;
+        left: 0;
+        right: 0;
+        /* align-items: center; */
+        height: 5em;
+        background-color: lightgray;
+        padding: 10px 0 10px 0;
+    }
+
+    .buttonDiv {
+        display: inline-flex;
+        float: right;
+        align-items: center;
+        height: 100%;
+    }
+
+    .productInfo > div {
+        margin-left: 10px;
+        /* vertical-align: middle; */
+    }
+
+    #productImg {
+        aspect-ratio : 1 / 1;
+        height: 100%;
+        object-fit: cover;
+        margin-left: 10px;
+        /* margin-top: -10px; */
+    }
+
+    #backBtn {
+        margin-left: 10px;
+        /* vertical-align: middle; */
+        text-decoration: none;
+    }
+
+    #send {
+        width: 100%;
+        text-wrap: nowrap;
+    }
+
+    #buy {
+        margin-left: auto;
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+
+    .chat {
+        width: 100%;
+        height: 100%;
+    }
+
+    .chatCard { 
+        text-decoration: none;
+    }
+
+    .nochat {
+        display:block;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .scroll {
+        overflow-y: auto;
+        height: calc(100% - 8.5em);
+    }
+
+    .bubble {
+        /* display:block; */
+        max-width: 80%;
+        width: fit-content;
+        margin: 10px;
+    }
+
+    .bubbleText {
+        display: inline-block;
+        max-width: 100%;
+        width: fit-content;
+        border-radius: 10px;
+        border: lightgray solid 1px;
+        padding: 10px;
+    }
+
+    .timestamp {
+        color:rgb(172, 172, 172);
+        font-size: 0.8em;
+        vertical-align: bottom;
+        margin: 0 5px 0 5px;
+    }
+
+    .text {
+        margin: 10px;
+        position: fixed;
+        bottom: 10px;
+        left: 0;
+        right: 0;
+    }
+
+    .right {
+        margin-left: auto;
+    }
+
+    .row > div {
+        padding: 0;
+    }
+
+    .row > div:nth-child(1) {
+        padding-right: 10px;
+    }
+
+    .hide {
+        display:none;
+    }
+</style>
+<%- include('nav') %>
+<div class="root">
+    <div class="chat">
+        <div class="productInfo">
+            <a id="backBtn" href="#">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="black" class="bi bi-arrow-left-short" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/>
+                </svg>
+            </a>
+            <img src="/files/1702891516771_photo-1505740420928-5e560c06d30e.webp" id="productImg">
+            <div style="display: inline-block;">
+                <span id="productName">존1나 개쩌는 상품</span><br>
+                <span id="productPrice" class="h5">100,000원</span>
+            </div>
+            <div class="buttonDiv">
+                <button class="btn btn-primary" id="buy">예약하기</button>
+            </div>
+        </div>
+        <div class="scroll">
+        </div>
+        <div class="text">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-9">
+                        <input id="chatText" class="form-control" type="text">
+                    </div>
+                    <div class="col">
+                        <button class="btn btn-primary" id="send">전송</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let chat_id = -1;
+    let trade_id = -1;
+    const channel = new BroadcastChannel('noti')
+
+    channel.onmessage = (e) => {
+        const data = e.data;
+        // console.log(data);
+
+        let date = new Date();
+        let card = `<div class="bubble left">
+            <div class="bubbleText">
+                ${e.content}
+            </div>
+            <span class="timestamp">${dateToString(date)}</span>
+            </div>`
+        $('div.scroll').append(card);
+        var scroll=$('div.scroll');
+        scroll.animate({scrollTop: scroll.prop("scrollHeight")});
+    };
+
+    $(document).on('keydown', 'input#chatText', (e) => {
+        if(e.key == 'Enter') $('button#send').click();
+    })
+
+    $(document).on('click', 'button#send', (e) => {
+        let content = $('input#chatText').val().trim();
+        if(!!!content && !!!content.length) return;
+        fetch('/api/chat/sendMessage', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chatId: chat_id,
+                content: content
+            })
+        }).then(async res => {
+            let data = await res.json();
+            $('input#chatText').val('');
+            if(data.status != 200) {
+                alert('메시지 전송에 실패했습니다.')
+            }else{
+                let date = new Date();
+                let card = `<div class="bubble right">
+                    <span class="timestamp">${dateToString(date)}</span>
+                    <div class="bubbleText">
+                        ${content}
+                    </div>
+                </div>`
+                $('div.scroll').append(card);
+                var scroll=$('div.scroll');
+                scroll.animate({scrollTop: scroll.prop("scrollHeight")});
+            }
+        });
+    })
+
+    $(document).on('click', 'a#backBtn', (e) => {
+        location.href = '/chat'
+    });
+
+    /**
+     * @param {Date} date
+     */
+    function dateToString(date) {
+        return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    }
+
+    async function loadMessages(chatId) {
+        $('div.scroll').html('');
+
+        let chatInfo = await (await fetch('/api/chat/getChatById?chatId=' + chatId)).json();
+        let tradeId;
+        if(chatInfo.status == 200) tradeId = chatInfo.data.trade_id
+        else {
+            alert('채팅 정보를 불러올 수 없습니다.')
+            location.href = '/chat'
+        }
+
+        // 상품 정보 로딩
+        fetch('/api/trades/getTradeInfo?tradeId=' + tradeId).then(async res => {
+            let data = (await res.json()).result;
+            
+            $('span#productName').text(data.title)
+            $('span#productPrice').text(`${data.price.toLocaleString('en-US')}원`);
+            $('img#productImg').attr('src', data.thumbnail);
+        });
+
+        // 메시지 내역 로딩
+        fetch('/api/chat/getMessages?chatId=' + chatId).then(async res => {
+            let data = (await res.json()).data;
+            if(!!data?.length) {
+                data.forEach((e) => {
+                let date = new Date(e.timestamp);
+                let card = `<div class="bubble ${e.isMe ? "right" : "left"}">
+                    ${e.isMe ? `<span class="timestamp">${dateToString(date)}</span>` : ''}
+                    <div class="bubbleText">
+                        ${e.content}
+                    </div>
+                    ${!e.isMe ? `<span class="timestamp">${dateToString(date)}</span>` : ''}
+                    </div>`
+                    $('div.scroll').append(card);
+                });
+                var scroll = $('div.scroll');
+                scroll.animate({scrollTop: scroll.prop("scrollHeight")});
+            } else {
+                // $('div.scroll').append('<span class="nochat">아직 조용하군요..</span>');
+            }
+        });
+    }
+
+    $(window).on('load', () => {
+        chat_id = window.location.href.match(/chatid=[0-9]+/g);
+        // trade_id = window.location.href.match(/tradeid=[0-9]+/g);
+
+        if(!!chat_id?.length) {
+            chat_id = chat_id[0].split('=')[1];
+            // trade_id = trade_id[0].split('=')[1];
+            loadMessages(chat_id);
+        }else window.location.href = '/chat';
+    })
+</script>
