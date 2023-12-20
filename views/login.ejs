@@ -27,8 +27,8 @@
 
 <script>
     function login() {
-        let redirHref = location.href.match(/redir=[A-z0-9$\-_.+!*'()%]+/g)[0]
-        if(!!redirHref) redirHref = decodeURIComponent(redirHref.split('=')[1]);
+        let redirHref = location.href.match(/redir=[A-z0-9$\-_.+!*'()%]+/g);
+        if(!!redirHref) redirHref = decodeURIComponent(redirHref[0].split('=')[1]);
         else redirHref = '/';
         let id = $('#id').val();
         let pw = $('#password').val();

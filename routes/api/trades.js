@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const tradeManager = require('../../lib/tradeManager');
+const chatManager = require('../../lib/chatManager');
 
 //const 구목록 = ['상당구', '서원구', '흥덕구', '청원구', '시외'];
 
@@ -98,8 +99,27 @@ router.delete('/remove', (req, res) => {
 });
 
 router.post('/changestatus', (req, res) => {
-    req.session.userId = undefined;
-    res.send('');
+    try {
+        let userId = req.session.userId;
+        let body = req.body;
+        let tradeId = body.tradeId;
+        let chatId = body.chatId;
+        let status = body.status;
+        let tradeInfo = tradeManager.getTrade(tradeId);
+        let chatInfo = chatManager.getChatByChatId(chatId);
+        // console.log(body)
+        // console.log(tradeInfo, chatInfo)
+        if(tradeInfo.result && chatInfo.result) {
+            if(tradeInfo.result.ownerId != userId) res.status(403).json({status: req.statusCode});
+            else {
+                tradeManager.updateTrade(tradeId, status, chatInfo.result.buyer_id);
+                res.status(200).json({status: res.statusCode})
+            }
+        }else throw new Error();
+    }catch(e){
+        console.error(e);
+        res.status(500).json({status: res.statusCode});
+    }
 });
 
 module.exports = router;

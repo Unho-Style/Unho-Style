@@ -13,13 +13,14 @@ var registerRouter = require('./routes/register');
 var writeRouter = require('./routes/write');
 var emailconfirmRouter = require('./routes/emailconfirm');
 var chatRouter = require('./routes/chat');
+var ratingRouter = require('./routes/rating');
 var messageRouter = require('./routes/messages');
 var fileUploadApiRouter = require('./routes/api/upload');
 var tradeApiRouter = require('./routes/api/trades');
 var userApiRouter = require('./routes/api/user');
 var chatApiRouter = require('./routes/api/chat')(io);
 var productRouter = require('./routes/product');
-var myInfoRouter = require('./routes/myinfo');
+var myInfoRouter = require('./routes/editmyinfo');
 
 var app = express();
 
@@ -56,6 +57,7 @@ app.use('/api/fileupload', fileUploadApiRouter);
 app.use('/api/chat', chatApiRouter);
 app.use('/api/trades', tradeApiRouter);
 app.use('/product', productRouter);
+app.use('/rating', ratingRouter);
 app.use('/chat', chatRouter);
 app.use('/message', messageRouter);
 app.use('/write', writeRouter);

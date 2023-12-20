@@ -1,0 +1,58 @@
+<style>
+    .root {
+        padding: 25px;
+        height: calc(100vh - 3.5rem);
+        overflow-y: auto;
+    }
+
+    .productImg {
+        aspect-ratio: 1/1;
+        width: 100px;
+        object-fit: cover;
+    }
+
+    .productTitle {
+        vertical-align: bottom;
+    }
+
+    .rating {
+        display: none;
+    }
+
+    #confirm {
+        margin-top: 10px;
+    }
+</style>
+
+<%- include('nav', {username: username}) %>
+<div class="root">
+    <div class="productInfo">
+        <img class="productImg" src="">
+        <span class="h3 productTitle">상품명</span>
+    </div>
+    <h3 style="margin-top: 10px">의 거래 경험은 어땠나요?</h3>
+    <select class="form-control" id="rating" name="rating">
+        <option value="5">매우만족</option>
+        <option value="4">만족</option>
+        <option value="3">보통</option>
+        <option value="2">불만족</option>
+        <option value="1">매우불만족</option>
+    </select>
+
+    <button class="btn btn-primary" id="confirm">완료</button>
+</div>
+
+<script>
+    let trade_id
+    $(window).on('load', () => {
+        trade_id = window.location.href.match(/tradeId=[0-9]+/g);
+        if(!!trade_id?.length) {
+            trade_id = trade_id[0].split('=')[1];
+            fetch('/api/trades/getTradeInfo?tradeId=' + trade_id).then(async res => {
+                let data = (await res.json()).result;
+                $('.productImg').attr('src', data.thumbnail)
+                $('.productTitle').text(data.title)
+            })
+        }
+    })
+</script>

@@ -4,7 +4,7 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    if(!!!req.session.userId) res.redirect('/login?redir=' + encodeURIComponent(req.originalUrl));
+    if(!!!req.session.userId) res.render('index', {view: 'needregister'});
     else{
         let userInfo = userManager.getUserInfoById(req.session.userId).result;
         if(userInfo.isAuthed != 1) res.redirect('/emailconfirm');
