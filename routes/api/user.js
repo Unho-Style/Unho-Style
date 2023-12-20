@@ -3,6 +3,7 @@ var router = express.Router();
 const crypto = require('crypto');
 const verifManager = require('../../lib/verifiedManager');
 const userManager = require('../../lib/userManager');
+const tradeManager = require('../../lib/tradeManager');
 
 //const 구목록 = ['상당구', '서원구', '흥덕구', '청원구', '시외'];
 
@@ -128,6 +129,45 @@ router.get('/logout', (req, res) => {
     req.session.userId = undefined;
     res.redirect('/');
 });
+
+router.post('/rate', (req, res) => {
+    if(!!!req.session.userId) {
+        res.status(403).send({
+            status: res.statusCode,
+            error: {
+                message: '로그인후 이용해주세요'
+            }
+        });
+        return
+    }
+    let tradeId = req.body.trade_id;
+    let rating = req.body.rating;
+    console.log(req.body)
+    let tradeInfo = tradeManager.getTrade(tradeId)
+    if(tradeInfo.success) {
+        let ownerId = tradeInfo.result.ownerId;
+        if(ownerId == req.session.userId) {
+            res.status(400).send({
+                status: res.statusCode,
+                error: {
+                    message: '자신의 거래는 평가할 수 없습니다.'
+                }
+            });
+        }else{
+            userManager.setUserRate(ownerId, rating);
+            res.status(200).send({
+                status: res.statusCode
+            });
+        }
+    }else{
+        res.status(404).send({
+            status: res.statusCode,
+            error: {
+                message: '존재하지 않는 거래입니다.'
+            }
+        });
+    }
+})
 
 router.post('/pushSubscribe', (req, res) => {
     if(!!!req.session.userId) {

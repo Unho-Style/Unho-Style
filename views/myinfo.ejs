@@ -1,0 +1,37 @@
+<style>
+    .root {
+        padding: 25px;
+        height: calc(100vh - 3.5rem);
+        overflow-y: auto;
+    }
+
+    .card {
+        text-decoration: none;
+        margin-bottom: 10px;
+        width: 100%;
+        cursor: pointer;
+    }
+</style>
+
+<%- include('nav', {username: username}) %>
+<div class="root">
+    <div class="userprofile">
+        <h3>bass9030님</h3>
+        <div class="totalSell">
+            <span>총 판매금액</span>
+            <span id="sellPrice">1,000원</span>
+        </div>
+    </div>
+    <div class="productDiv">
+        <div class="tabs">
+            <a href="#">판매내역</a>
+            <a href="#">구매내역</a>
+        </div>
+        <div class="content">
+        </div>
+    </div>
+</div>
+
+<script>
+    
+</script>

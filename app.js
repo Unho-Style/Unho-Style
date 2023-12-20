@@ -20,7 +20,8 @@ var tradeApiRouter = require('./routes/api/trades');
 var userApiRouter = require('./routes/api/user');
 var chatApiRouter = require('./routes/api/chat')(io);
 var productRouter = require('./routes/product');
-var myInfoRouter = require('./routes/editmyinfo');
+var editInfoRouter = require('./routes/editmyinfo');
+var myInfoRouter = require('./routes/myinfo');
 
 var app = express();
 
@@ -61,6 +62,7 @@ app.use('/rating', ratingRouter);
 app.use('/chat', chatRouter);
 app.use('/message', messageRouter);
 app.use('/write', writeRouter);
+app.use('/editinfo', editInfoRouter);
 app.use('/myinfo', myInfoRouter);
 
 app.io = io;

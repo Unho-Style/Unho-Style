@@ -78,7 +78,7 @@
     </div>
     <div class="buttons">
         <div>
-            <a id="createChat" class="btn btn-primary <%=productInfo.status != 0 ? "disabled" : ""%>" href="#">채팅</a>
+            <a id="createChat" class="btn <%=productInfo.status != 0 ? "disabled btn-secondary" : "btn-primary"%>" href="#"><%= productInfo.status == 0 ? "채팅" : "판매완료"%></a>
         </div>
     </div>
     <h2 id="title"><%=productInfo.title%></h2>

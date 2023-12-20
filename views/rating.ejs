@@ -43,7 +43,27 @@
 </div>
 
 <script>
-    let trade_id
+    let trade_id;
+    $(document).on('click', '#confirm', () => {
+        let rating = parseInt($('#rating').val());
+        fetch('/api/user/rate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                trade_id,
+                rating
+            })
+        }).then(async res => {
+            let data = await res.json();
+            if(data.status == 200) window.location.href = '/';
+            else {
+                alert(data.error.message);
+            }
+        })
+    })
+
     $(window).on('load', () => {
         trade_id = window.location.href.match(/tradeId=[0-9]+/g);
         if(!!trade_id?.length) {
