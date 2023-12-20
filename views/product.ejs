@@ -26,6 +26,10 @@
         width: 100%;
         height: 100%;
     }
+
+    #ownerInfo {
+        color:black;
+    }
     
     .root {
         padding: 25px;
@@ -78,11 +82,12 @@
     </div>
     <div class="buttons">
         <div>
-            <a id="createChat" class="btn <%=productInfo.status != 0 ? "disabled btn-secondary" : "btn-primary"%>" href="#"><%= productInfo.status == 0 ? "채팅" : "판매완료"%></a>
+            <a id="createChat" class="btn <%=productInfo.status != 0 ? "btn-secondary" : "btn-primary"%>" href="#"><%= productInfo.status == 0 ? "채팅" : "판매완료"%></a>
         </div>
     </div>
     <h2 id="title"><%=productInfo.title%></h2>
-    <h2 id="price"><%=(productInfo.price).toLocaleString('en-US')%>원</h2>
+    <h3 id="price"><%=(productInfo.price).toLocaleString('en-US')%>원</h2>
+    <a id="ownerInfo" href="/info?userId=<%=productInfo.ownerId%>" id="owner"><%=productInfo.ownerUsername%> | <%=['상당구', '서원구', '흥덕구', '청원구', '시외'][productInfo.location]%></a>
     <hr>
     <%productInfo.content.split('\n').forEach((e) => {%>
     <span class="content"><%=e%></span>

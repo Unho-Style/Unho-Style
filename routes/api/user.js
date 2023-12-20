@@ -130,6 +130,38 @@ router.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
+router.get('/getUserInfo', (req, res) => {
+    if(!!!req.session.userId) {
+        res.status(403).send({
+            status: res.statusCode,
+            error: {
+                message: '로그인후 이용해주세요'
+            }
+        });
+        return
+    }
+    let userId = req.query.userId ?? req.session.userId;
+
+    let userInfo = userManager.getUserInfoById(userId);
+    if(userInfo.success) {
+        let data = userInfo.result;
+        delete data.password;
+        delete data.email;
+        delete data.subInfo;
+        res.status(200).send({
+            status: res.statusCode,
+            data
+        });
+    }else{
+        res.status(404).send({
+            status: res.statusCode,
+            error: {
+                message: '존재하지 않는 사용자입니다.'
+            }
+        });
+    }
+})
+
 router.post('/rate', (req, res) => {
     if(!!!req.session.userId) {
         res.status(403).send({
@@ -142,7 +174,7 @@ router.post('/rate', (req, res) => {
     }
     let tradeId = req.body.trade_id;
     let rating = req.body.rating;
-    console.log(req.body)
+
     let tradeInfo = tradeManager.getTrade(tradeId)
     if(tradeInfo.success) {
         let ownerId = tradeInfo.result.ownerId;

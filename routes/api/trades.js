@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const tradeManager = require('../../lib/tradeManager');
 const chatManager = require('../../lib/chatManager');
+const userManager = require('../../lib/userManager');
 
 //const 구목록 = ['상당구', '서원구', '흥덕구', '청원구', '시외'];
 
@@ -38,8 +39,45 @@ router.post('/upload', (req, res) => {
 });
 
 router.get('/get', (req, res) => {
+    if(!!!req.session.userId) {
+        res.status(403).json({status: res.statusCode, msg: '로그인하지 않았습니다.'});
+        msg = '로그인하지 않았습니다.'
+        return
+    }
     let page = req.query.page;
     const result = tradeManager.getTradesByPage(page);
+
+    if(result.success) res.status(200);
+    else res.status(500);
+
+    res.json({
+        status: res.statusCode,
+        result: result?.result
+    });
+});
+
+router.get('/getSellList', (req, res) => {
+    let ownerId = req.query.userId ?? req.session.userId;
+    if(!!!ownerId) {
+        res.status(403).json({status: 403})
+    }
+    const result = tradeManager.getTradesByOwnerId(ownerId);
+
+    if(result.success) res.status(200);
+    else res.status(500);
+
+    res.json({
+        status: res.statusCode,
+        result: result?.result
+    });
+});
+
+router.get('/getBuyList', (req, res) => {
+    let buyerId = req.query.userId ?? req.session.userId;
+    if(!!!buyerId) {
+        res.status(403).json({status: 403})
+    }
+    const result = tradeManager.getTradesByBuyerId(buyerId);
 
     if(result.success) res.status(200);
     else res.status(500);
@@ -113,6 +151,14 @@ router.post('/changestatus', (req, res) => {
             if(tradeInfo.result.ownerId != userId) res.status(403).json({status: req.statusCode});
             else {
                 tradeManager.updateTrade(tradeId, status, chatInfo.result.buyer_id);
+                userManager.sendPushNoti(chatInfo.result.buyer_id, {
+                    event: 'STATUS_CHANGE',
+                    data: {
+                        tradeTitle: tradeInfo.result.title,
+                        tradeId: tradeId,
+                        status
+                    }
+                });
                 res.status(200).json({status: res.statusCode})
             }
         }else throw new Error();

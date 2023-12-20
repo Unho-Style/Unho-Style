@@ -11,26 +11,29 @@
         }
 
         .notiReq {
-            z-index: 9;
-            width: 100dvw;
-            height: 100dvh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9998;
             background-color: rgba(0, 0, 0, 0.7);
         }
 
-        .popup > span {
-            display: block;
-            word-wrap: break-word;
+        .popup > p {
+            width: 100%;
+            white-space: pre-line;
         }
 
         .popup {
-            z-index: 10;
+            z-index: 9999;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background-color: white;
             border-radius: 10px;
-            width: fit-content;
+            width: 90%;
             padding: 15px;
             margin: 0 auto;
         }
@@ -57,8 +60,7 @@
 <body>
     <div class="notiReq hide">
         <div class="popup">
-            <span>해당 웹페이지는 원할한 서비스 제공을 위해 푸시 알림 서비스를 제공합니다.</span>
-            <span>채팅등 서비스 제공을 위해 해당 기기로 푸시 알림 전송을 허용하시겠습니까?</span>
+            <p>해당 웹페이지는 원할한 서비스 제공을 위해 푸시 알림 서비스를 제공합니다.<br>채팅등 서비스 제공을 위해 해당 기기로 푸시 알림 전송을 허용하시겠습니까?</p>
             <div class="btnDiv">
                 <button id="agree" class="btn btn-primary">동의</button>
             </div>
@@ -82,25 +84,35 @@
             })).json()
         }
 
+        let username = '<%=username%>';
+
+        let serviceworker;
+
         if('serviceWorker' in navigator && 'Notification' in window && 'PushManager' in window) {
             navigator.serviceWorker.register('/js/sw.js').then(e => {
+                serviceworker = e;
                 // if(localStorage.getItem('isSubscribed') == 'true') return;
+                if(location.href.startsWith('/login') || !!!username) return;
                 if(localStorage.getItem('isSubscribed') == null) {
                     $('.notiReq').removeClass('hide');                  
                 }
             });
-        };
+        }else{
+            $('.btnDiv').remove();
+            $('.popup > p').text('페이지 구동에 필요한 기능을 웹브라우저에서 지원하지 않아 페이지를 사용할 수 없습니다.\n현재 권장하는 브라우저는 크롬입니다.')
+            $('.notiReq').removeClass('hide');                  
+        }
 
         $(document).on('click', 'button#agree', async () => {
             localStorage.setItem('isSubscribed', true)
             if(Notification.permission == 'default') {
                 await Notification.requestPermission((permission) => {
                     if(permission == 'granted') {
-                        subscribePushNoti(e);
+                        subscribePushNoti(serviceworker);
                     }
                 });
             }else if(Notification.permission == 'granted') {
-                subscribePushNoti(e);
+                subscribePushNoti(serviceworker);
             }
             $('.notiReq').addClass('hide')
         })

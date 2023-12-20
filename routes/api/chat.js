@@ -62,13 +62,18 @@ module.exports = (io) => {
             res.status(400).json({status: res.statusCode, error: {message: '자신이 판매중인 상품에는 채팅을 걸 수 없습니다.'}});
             return;
         }
+        let tradeInfo = tradeManager.getTrade(tradeId);
         let prevChatID = chatManager.getChatIdFor(tradeId, ownerId, buyerId);
         if(prevChatID.success) {
             res.status(200).json({status: res.statusCode, chat_id: prevChatID.chat_id});
         }else {
-            let data = chatManager.createChat(tradeId, ownerId, buyerId);
-            if(data.success) res.status(200).json({status: res.statusCode, chat_id: data.chat_id});
-            else res.status(500).json({status: res.statusCode});
+            if(tradeInfo.result.status == 0) {
+                let data = chatManager.createChat(tradeId, ownerId, buyerId);
+                if(data.success) res.status(200).json({status: res.statusCode, chat_id: data.chat_id});
+                else res.status(500).json({status: res.statusCode});
+            }else{
+                res.status(404).json({status: res.statusCode, error: {message: '이미 판매된 상품입니다.'}});
+            }
         }
     })
 

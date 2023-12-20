@@ -4,28 +4,82 @@
         height: calc(100vh - 3.5rem);
         overflow-y: auto;
     }
+    
+    .tabs > .tab:nth-child(2) {
+        margin-left: 5px;
+    }
+
+    .tabs > .tab {
+        display: inline-block;
+        padding: 5px;
+        border-bottom: 3px gray solid;
+    }
+
+    .active {
+        color: #0d6efd !important;
+        border-bottom: 3px #0d6efd solid !important;
+    }
+    
+    .active > a {
+        color: #0d6efd !important;
+    }
+
+    .tab > a {
+        color: gray;
+        text-decoration: none;
+    }
 
     .card {
-        text-decoration: none;
         margin-bottom: 10px;
-        width: 100%;
-        cursor: pointer;
+    }
+
+    .productImg {
+        position: relative;
+    }
+
+    .selled {
+        background-color: rgba(0,0,0,0.6);
+        color: white;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    .selled > h3 {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .hide {
+        display: none;
     }
 </style>
 
 <%- include('nav', {username: username}) %>
 <div class="root">
     <div class="userprofile">
-        <h3>bass9030님</h3>
+        <h3 id="username">TEST님</h3>
         <div class="totalSell">
             <span>총 판매금액</span>
             <span id="sellPrice">1,000원</span>
+            <span> | </span>
+            <span id="location">1,000원</span>
+            <span> | </span>
+            <span id="rate">1,000원</span>
         </div>
     </div>
     <div class="productDiv">
         <div class="tabs">
-            <a href="#">판매내역</a>
-            <a href="#">구매내역</a>
+            <div class="tab sell-list active">
+                <a id="sellList" href="#">판매내역</a>
+            </div>
+            <div class="tab buy-list">
+                <a id="buyList" href="#">구매내역</a>
+            </div>
         </div>
         <div class="content">
         </div>
@@ -33,5 +87,98 @@
 </div>
 
 <script>
-    
+    let userId;
+
+
+    function getRating() {
+        fetch('/api/user/getUserInfo' + (!!userId ? `?userId=${userId}` : '')).then(async res => {
+                let data = await res.json();
+
+                if(data.status == 200) {
+                    $('#username').text(`${data.data.username}님`)
+                    $('#rate').text(`평점: ${data.data.rate}`)
+                    $('#location').text(`${['상당구', '서원구', '흥덕구', '청원구', '시외'][data.data.location]}`)
+                }else if(data.status == 404) {
+                    alert('존재하지 않는 사용자입니다.')
+                    window.location.href = '/'
+                }else reject();
+        });
+    }
+
+    function showSellList(data) {
+        let totalSell = 0;
+        $('div.tab.sell-list').addClass('active');
+        $('div.tab.buy-list').removeClass('active');
+        $('div.content').html('')
+
+        fetch('/api/trades/getSellList' + (!!userId ? `?userId=${userId}` : '')).then(async res => {
+            let data = await res.json();
+            if(data.status == 200) {
+                data.result.forEach((e, i) => {
+                    totalSell += e.price;
+                    let card = `<a class="card" href="/product/${e.id}">
+                        <div class="productImg">
+                            <div class="selled ${e.status == 0 ? "hide" : ""}">
+                                <h3>판매완료</h3>
+                            </div>
+                            <img src="${e.thumbnail}" class="card-img-top">
+                        </div>
+                        <div class="card-body">
+                          <h5 class="card-title">${e.title}</h5>
+                          <p class="card-text">${e.price.toLocaleString('en-US')}원</p>
+                        </div>
+                    </a>`
+                    $('div.content').append(card);
+                });
+                $('span#sellPrice').text(`${totalSell.toLocaleString('en-US')}원`)
+            }else{
+                alert('판매내역을 불러오는데 실패했습니다.')
+            }
+        })
+    }
+
+    function showBuyList() {
+        $('div.tab.sell-list').removeClass('active');
+        $('div.tab.buy-list').addClass('active');
+        $('div.content').html('')
+
+        fetch('/api/trades/getBuyList' + (!!userId ? `?userId=${userId}` : '')).then(async res => {
+            let data = await res.json();
+            if(data.status == 200) {
+                let sellList = data.result.forEach(e => {
+                    let card = `<a class="card" href="/product/${e.id}">
+                        <div class="productImg">
+                            <div class="selled ${e.status == 0 ? "hide" : ""}">
+                                <h3>판매완료</h3>
+                            </div>
+                            <img src="${e.thumbnail}" class="card-img-top">
+                        </div>
+                        <div class="card-body">
+                          <h5 class="card-title">${e.title}</h5>
+                          <p class="card-text">${e.price.toLocaleString('en-US')}원</p>
+                        </div>
+                    </a>`
+                    $('div.content').append(card);
+                })
+            }else{
+                alert('판매내역을 불러오는데 실패했습니다.')
+            }
+        })
+    }
+
+    $(document).on('click', 'a#sellList', () => {
+        showSellList();
+    })
+
+    $(document).on('click', 'a#buyList', () => {
+        showBuyList();
+    })
+
+    $(window).on('load', () => {
+        userId = window.location.href.match(/userId=[0-9]+/g);
+
+        if(!!userId?.length) userId = userId[0].split('=')[1];
+        getRating();
+        showSellList();
+    })
 </script>

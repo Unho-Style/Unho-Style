@@ -12,8 +12,13 @@ router.get('/:productID', function(req, res, next) {
         else {
             let prodID = req.params.productID;
             let productInfo = tradeManager.getTrade(prodID);
-            if(!productInfo.result) res.redirect('/404');
-            else res.render('index', {view: 'product', username: userInfo.username, productInfo: productInfo.result})
+            if(!productInfo.success) res.redirect('/404');
+            else {
+                let data = productInfo.result;
+                let ownerInfo = userManager.getUserInfoById(data.ownerId);
+                data = Object.assign(data, {ownerUsername: ownerInfo.result.username, location: ownerInfo.result.location})
+                res.render('index', {view: 'product', username: userInfo.username, productInfo: data})
+            }
         }
     }
 });

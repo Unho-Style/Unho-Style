@@ -11,6 +11,31 @@
         width: 100%;
         cursor: pointer;
     }
+
+    .productImg {
+        position: relative;
+    }
+
+    .selled {
+        background-color: rgba(0,0,0,0.6);
+        color: white;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    .selled > h3 {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .hide {
+        display: none;
+    }
 </style>
 
 <%- include('nav', {username: username}) %>
@@ -39,7 +64,12 @@
                 if(!!data.result) {
                     data.result.forEach(e => {
                         let card = `<a class="card" href="/product/${e.id}">
-                            <img src="${e.thumbnail}" class="card-img-top">
+                            <div class="productImg">
+                                <div class="selled ${e.status == 0 ? "hide" : ""}">
+                                    <h3>판매완료</h3>
+                                </div>
+                                <img src="${e.thumbnail}" class="card-img-top">
+                            </div>
                             <div class="card-body">
                               <h5 class="card-title">${e.title}</h5>
                               <p class="card-text">${e.price.toLocaleString('en-US')}원</p>
@@ -60,7 +90,12 @@
             if(!!data.result) {
                 data.result.forEach(e => {
                     let card = `<a class="card" href="/product/${e.id}">
-                        <img src="${e.thumbnail}" class="card-img-top">
+                        <div class="productImg">
+                            <div class="selled ${e.status == 0 ? "hide" : ""}">
+                                <h3>판매완료</h3>
+                            </div>
+                            <img src="${e.thumbnail}" class="card-img-top">
+                        </div>
                         <div class="card-body">
                           <h5 class="card-title">${e.title}</h5>
                           <p class="card-text">${e.price.toLocaleString('en-US')}원</p>

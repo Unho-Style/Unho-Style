@@ -8,7 +8,7 @@ router.get('/', function(req, res, next) {
     else{
         let userInfo = userManager.getUserInfoById(req.session.userId).result;
         if(userInfo?.isAuthed == 1) res.redirect('/');
-        else res.render('index', {view: 'authcode'});
+        else res.render('index', {view: 'authcode', username: ''});
     }
     
 });
