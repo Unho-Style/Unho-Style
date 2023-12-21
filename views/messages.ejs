@@ -204,6 +204,7 @@
 
     $(document).on('click', 'button#send', (e) => {
         let content = $('input#chatText').val().trim();
+        $('input#chatText').val('');
         if(!!!content && !!!content.length) return;
         fetch('/api/chat/sendMessage', {
             method: 'POST',
@@ -216,7 +217,6 @@
             })
         }).then(async res => {
             let data = await res.json();
-            $('input#chatText').val('');
             if(data.status != 200) {
                 alert('메시지 전송에 실패했습니다.')
             }else{
