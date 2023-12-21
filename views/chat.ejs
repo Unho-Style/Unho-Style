@@ -124,7 +124,7 @@
                 let card = `<a class="card chatCard" href="/message?chatid=${e.chat_id}">
                         <div class="card-body">
                             <h5 class="card-title">${e.username}</h5>
-                            <p class="card-text">${e.last_message}</p>
+                            <p class="card-text">${e.last_message ?? ''}</p>
                         </div>
                     </a>`
                     $('div.chatlist').append(card);
