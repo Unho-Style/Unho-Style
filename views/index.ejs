@@ -90,7 +90,8 @@
 
         let serviceworker;
 
-        if('serviceWorker' in navigator && 'Notification' in window && 'PushManager' in window) {
+        if(('serviceWorker' in navigator && 'Notification' in window && 'PushManager' in window)) {
+        // if(false) {
             navigator.serviceWorker.register('/js/sw.js').then(e => {
                 serviceworker = e;
                 // if(localStorage.getItem('isSubscribed') == 'true') return;
@@ -101,7 +102,7 @@
             });
         }else{
             $('.btnDiv').remove();
-            $('.popup > p').text('페이지 구동에 필요한 기능을 웹브라우저에서 지원하지 않아 페이지를 사용할 수 없습니다.\n현재 권장하는 브라우저는 크롬입니다.')
+            $('.popup > p').text('페이지 구동에 필요한 기능을 웹브라우저에서 지원하지 않아 페이지를 사용할 수 없습니다.\n현재 권장하는 브라우저는 크롬입니다.\n\n* iOS/iPadOS의 경우 "상단 공유 버튼 → 홈화면에 추가"를 통해 이용해주세요.')
             $('.notiReq').removeClass('hide');                  
         }
 
