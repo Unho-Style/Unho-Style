@@ -11,6 +11,7 @@ self.addEventListener('push', function (event) {
                 data: {
                     link: `/message?chatid=${data.data.chatId}`
                 },
+                actions: [{title: '확인하기', action: 'goTab'}],
                 vibrate: [100, 100, 100],
             })
         }());
@@ -21,6 +22,7 @@ self.addEventListener('push', function (event) {
                 data: {
                     link: `/rating?tradeId=${data.data.tradeId}`
                 },
+                actions: [{title: '후기 남기기', action: 'goTab'}],
                 vibrate: [100, 100, 100],
             })
         }());
@@ -28,6 +30,6 @@ self.addEventListener('push', function (event) {
 });
 
 self.addEventListener("notificationclick", (event) => {
-    console.log(event.notification);
+    event.notification.close();
     clients.openWindow(event.notification.data.link).then(console.log).catch(console.error);
 });
