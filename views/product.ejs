@@ -27,8 +27,8 @@
         height: 100%;
     }
 
-    #ownerInfo {
-        color:black;
+    #ownerInfo, #removeProduct {
+        color: gray;
     }
     
     .root {
@@ -88,6 +88,7 @@
     <h2 id="title"><%=productInfo.title%></h2>
     <h3 id="price"><%=(productInfo.price).toLocaleString('en-US')%>원</h2>
     <a id="ownerInfo" href="/info?userId=<%=productInfo.ownerId%>" id="owner"><%=productInfo.ownerUsername%> | <%=['상당구', '서원구', '흥덕구', '청원구', '시외'][productInfo.location]%></a>
+    <%if(userId == productInfo.ownerId) { %><a id="removeProduct" href="#">삭제</a> <%}%>
     <hr>
     <%productInfo.content.split('\n').forEach((e) => {%>
     <span class="content"><%=e%></span>
@@ -95,6 +96,28 @@
 </div>
 
 <script>
+    $(document).on('click', 'a#removeProduct', () => {
+        if(confirm('정말로 게시글을 삭제하시겠습니까?')) fetch('/api/trades/remove', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                tradeId: parseInt('<%=productInfo.id%>')
+            })
+        }).then(async (res) => {
+            let data = await res.json()
+            if(data.status == 200) {
+                alert('삭제가 완료되었습니다.');
+                window.location.href = '/';
+            }else if(data.status == 401){
+                alert('본인의 게시글만 지울 수 있습니다.');
+            }
+        }).catch(res => {
+            console.log(res);
+        });
+    })
+
     $(document).on('click', 'a#createChat', () => {
         fetch('/api/chat/createChat', {
             method: 'POST',

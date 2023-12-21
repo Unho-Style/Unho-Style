@@ -141,7 +141,7 @@ router.get('/search', (req, res) => {
     });
 });
 
-router.delete('/remove', (req, res) => {
+router.post('/remove', (req, res) => {
     try {
         const body = req.body;
         if(!!!body) {
@@ -158,10 +158,9 @@ router.delete('/remove', (req, res) => {
         } else {
             console.log(body)
 
-            const result = tradeManager.deleteTrade(body.id, req.session.userId);
+            const result = tradeManager.deleteTrade(body.tradeId, req.session.userId);
             console.log(result)
             if(result.success) {
-                req.session.userId = result.result.id;
                 res.status(200)
             }else{
                 res.status(401)
@@ -170,10 +169,11 @@ router.delete('/remove', (req, res) => {
     }catch(e){
         console.log(e)
         res.status(500)
+    }finally{
+        res.json({
+            status: res.statusCode
+        });
     }
-    res.json({
-        status: res.statusCode
-    });
 });
 
 router.post('/changestatus', (req, res) => {

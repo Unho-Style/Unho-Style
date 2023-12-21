@@ -17,7 +17,7 @@ router.get('/:productID', function(req, res, next) {
                 let data = productInfo.result;
                 let ownerInfo = userManager.getUserInfoById(data.ownerId);
                 data = Object.assign(data, {ownerUsername: ownerInfo.result.username, location: ownerInfo.result.location})
-                res.render('index', {view: 'product', username: userInfo.username, productInfo: data})
+                res.render('index', {view: 'product', username: userInfo.username, userId: req.session.userId, productInfo: data})
             }
         }
     }
