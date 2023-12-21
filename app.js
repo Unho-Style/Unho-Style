@@ -20,6 +20,7 @@ var tradeApiRouter = require('./routes/api/trades');
 var userApiRouter = require('./routes/api/user');
 var chatApiRouter = require('./routes/api/chat')(io);
 var productRouter = require('./routes/product');
+var searchRouter = require('./routes/search');
 var editInfoRouter = require('./routes/editmyinfo');
 var myInfoRouter = require('./routes/info');
 
@@ -60,6 +61,7 @@ app.use('/api/trades', tradeApiRouter);
 app.use('/product', productRouter);
 app.use('/rating', ratingRouter);
 app.use('/chat', chatRouter);
+app.use('/search', searchRouter);
 app.use('/message', messageRouter);
 app.use('/write', writeRouter);
 app.use('/editinfo', editInfoRouter);

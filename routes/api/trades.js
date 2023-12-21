@@ -101,6 +101,46 @@ router.get('/getTradeInfo', (req, res) => {
     });
 });
 
+router.get('/search', (req, res) => {
+    try {
+        let query = req.query.query;
+        let category = req.query.category;
+        let lastId = req.query.lastId;
+
+        if(!!!category) {
+            res.status(400)
+            res.json({
+                status: res.statusCode,
+                error: {
+                    message: '카테고리를 지정해주세요'
+                }
+            });
+            return;
+        }
+        if(!!!req.session.userId) {
+            res.status(500);
+            msg = '로그인하지 않았습니다.'
+        } else {
+            const result = tradeManager.searchTrades(category, query, lastId);
+            console.log(result)
+            if(result.success) {
+                res.status(200).json({
+                    status: res.statusCode,
+                    data: result.result
+                })
+            }else{
+                res.status(401)
+            }
+        }
+    }catch(e){
+        console.log(e)
+        res.status(500)
+    }
+    res.json({
+        status: res.statusCode
+    });
+});
+
 router.delete('/remove', (req, res) => {
     try {
         const body = req.body;

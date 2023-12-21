@@ -1,0 +1,124 @@
+<style>
+    .root {
+        padding: 10px;
+        height: calc(100dvh - 3.5em);
+        display: flex;
+        flex-direction: column;
+    }
+    .card {
+        text-decoration: none;
+        margin-bottom: 10px;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .productImg {
+        position: relative;
+    }
+
+    .selled {
+        background-color: rgba(0,0,0,0.6);
+        color: white;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    .selled > h3 {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .hide {
+        display: none;
+    }
+
+    .searchResult {
+        flex: 1 0 auto;
+        height: 100px;
+        overflow-y: auto;
+    }
+</style>
+<%- include('nav', {username: username}) %>
+
+<div class="root">
+    <div>
+        <form id="docSearch" class="d-flex" action="/search" method="get">
+            <select class="form-select" id="category" name="category">
+                <option value="-1">전체</option>
+                <option value="0">디지털</option>
+                <option value="1">문구</option>
+                <option value="2">도서</option>
+                <option value="3">의류</option>
+                <option value="4">취미/게임/음반</option>
+                <option value="5">기타</option>
+            </select>
+          <input class="form-control me-2" type="search" id="searchQuery" name="query" placeholder="검색어 입력..." aria-label="Search">
+          <button class="btn btn-outline-success" id="search" type="submit">검색</button>
+        </form>
+        <hr>
+    </div>
+    <div class="searchResult">
+        
+    </div>
+</div>
+
+<script>
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split('&');
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split('=');
+            if (decodeURIComponent(pair[0]) == variable) {
+                return decodeURIComponent(pair[1]);
+            }
+        }
+        console.log('Query variable %s not found', variable);
+        return '';
+    }
+
+    let lastId = 0;
+    let query;
+    let category;
+
+    $(window).on('load', () => {
+        query = getQueryVariable('query')
+        category = getQueryVariable('category');
+        $('input#searchQuery').val(query)
+        $('select#category').val(category)
+        console.log(query, category);
+        
+        if(!!!category) {
+            alert('잘못된 요청입니다.')
+            window.location.href = '/';
+        }
+
+        fetch(`/api/trades/search?category=${category}&query=${encodeURIComponent(query)}&lastId=${lastId}`).then(async res => {
+            let data = await res.json();
+
+            if(data.status == 200) {
+                let searchResult = data.data;
+                searchResult.forEach(e => {
+                    lastId = e.id;
+                    let card = `<a class="card" href="/product/${e.id}">
+                            <div class="productImg">
+                                <div class="selled ${e.status == 0 ? "hide" : ""}">
+                                    <h3>판매완료</h3>
+                                </div>
+                                <img src="${e.thumbnail}" class="card-img-top">
+                            </div>
+                            <div class="card-body">
+                              <h5 class="card-title">${e.title}</h5>
+                              <p class="card-text">${e.price.toLocaleString('en-US')}원</p>
+                            </div>
+                        </a>`
+                    $('div.searchResult').append(card);
+                })
+            }
+        })
+    })
+</script>

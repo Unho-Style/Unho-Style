@@ -24,10 +24,30 @@
             </ul>
           </li>
         </ul>
-        <form class="d-flex">
-          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-success" type="submit">Search</button>
+        <form class="d-flex" action="/search" method="get">
+            <select class="form-select" id="category" name="category">
+                <option value="-1">전체</option>
+                <option value="0">디지털</option>
+                <option value="1">문구</option>
+                <option value="2">도서</option>
+                <option value="3">의류</option>
+                <option value="4">취미/게임/음반</option>
+                <option value="5">기타</option>
+            </select>
+          <input class="form-control me-2" type="search" id="searchQuery" name="query" placeholder="검색어 입력..." aria-label="Search">
+          <button class="btn btn-outline-success" id="search" type="submit">검색</button>
         </form>
       </div>
     </div>
 </nav>
+
+<style>
+    form > #category {
+        width: 30%;
+        margin-right: 10px;
+    }
+
+    form > #search {
+        width: 5em;
+    }
+</style>
